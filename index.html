@@ -692,12 +692,9 @@ const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
-// La app es PÚBLICA: no hay login. Lo que GUARDES de ahora en adelante se
-// escribe en la nube bajo este identificador fijo y compartido (tú y Rubén veis
-// lo mismo desde cualquier dispositivo, sin iniciar sesión).
-// Los datos guardados ANTES (cuando había login) se recuperan automáticamente
-// al cargar (ver loadAll), así que no hace falta tocar este valor.
-const PUBLIC_USER_ID = "00000000-0000-0000-0000-000000000000";
+// La app es PÚBLICA: no hay login ni usuarios. Los datos son únicos y
+// compartidos, identificados solo por el nombre de cada "caja" (key).
+// Cualquiera que abra la app ve y edita lo mismo.
 
 // Estas son las tres "cajas" de datos que guarda la app.
 const DATA_KEYS = ["menu_weeks_v4", "menu_log_v4", "menu_expenses_v4"];
@@ -705,22 +702,18 @@ const DATA_KEYS = ["menu_weeks_v4", "menu_log_v4", "menu_expenses_v4"];
 // Copia en memoria de los datos. La app lee de aquí (rápido) y cada cambio
 // se escribe en la nube en segundo plano.
 const cache = {};
-let currentUserId = null;
 
 // Carga TODOS los datos una vez (al entrar). Si no hay Supabase configurado,
 // carga desde el navegador.
-async function loadAll(userId){
-  currentUserId = userId;
+async function loadAll(){
   DATA_KEYS.forEach(k => { cache[k] = undefined; });
   if (!sb){
     DATA_KEYS.forEach(k => { try { const v=localStorage.getItem(k); cache[k]=v?JSON.parse(v):undefined; } catch(e){} });
     return;
   }
   try {
-    // App pública: leemos todos los datos guardados (sin filtrar por usuario) y
-    // nos quedamos con la versión MÁS RECIENTE de cada caja. Así se recuperan
-    // automáticamente los datos guardados antes, cuando todavía había login,
-    // y la app no aparece vacía.
+    // App pública: leemos todas las cajas (una por key) y nos quedamos con la
+    // versión MÁS RECIENTE de cada una (por si quedaran filas antiguas).
     const { data, error } = await sb.from("kv").select("key,data,updated_at")
       .order("updated_at", { ascending: true, nullsFirst: true });
     if (!error && data){ data.forEach(row => { cache[row.key] = row.data; }); }
@@ -730,11 +723,11 @@ async function loadAll(userId){
 // Guardado en la nube con un pequeño retardo, para no saturar con cada tecla.
 const _timers = {};
 function pushToCloud(k){
-  if (!sb || !currentUserId) return;
+  if (!sb) return;
   clearTimeout(_timers[k]);
   _timers[k] = setTimeout(async () => {
     try {
-      await sb.from("kv").upsert({ user_id: currentUserId, key: k, data: cache[k], updated_at: new Date().toISOString() });
+      await sb.from("kv").upsert({ key: k, data: cache[k], updated_at: new Date().toISOString() }, { onConflict: "key" });
     } catch(e){ console.error("No se pudo guardar en la nube:", k, e); }
   }, 600);
 }
@@ -1541,7 +1534,7 @@ function Root(){
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    loadAll(sb ? PUBLIC_USER_ID : null).then(()=> setReady(true));
+    loadAll().then(()=> setReady(true));
   }, []);
 
   if (!ready) return <Splash text="Cargando tu menú…" />;
