@@ -692,11 +692,11 @@ const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
-// La app es PÚBLICA: no hay login. Todos los datos se guardan en la nube bajo
-// este identificador fijo y compartido (tú y Rubén veis lo mismo desde
-// cualquier dispositivo, sin iniciar sesión).
-// Si antes usabas login y quieres CONSERVAR tus datos anteriores, pega aquí el
-// ID de tu antiguo usuario (Supabase → Authentication → Users → "User UID").
+// La app es PÚBLICA: no hay login. Lo que GUARDES de ahora en adelante se
+// escribe en la nube bajo este identificador fijo y compartido (tú y Rubén veis
+// lo mismo desde cualquier dispositivo, sin iniciar sesión).
+// Los datos guardados ANTES (cuando había login) se recuperan automáticamente
+// al cargar (ver loadAll), así que no hace falta tocar este valor.
 const PUBLIC_USER_ID = "00000000-0000-0000-0000-000000000000";
 
 // Estas son las tres "cajas" de datos que guarda la app.
