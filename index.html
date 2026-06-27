@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Menú Semanal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:#FBF5EC; --paper-2:#F3EADA; --ink:#1E241F; --ink-soft:#5A6157;
+    --sage:#16A368; --sage-light:#46C28C; --sage-pale:#D2F2E1;
+    --coral:#FF6A3D; --coral-pale:#FFDBCC; --gold:#F4A52C;
+    --blue:#2E8DBE; --blue-pale:#D3E9F5; --plum:#C84E9C; --plum-pale:#F7DBEF;
+    --line:#E7DCC8; --white:#FFFFFF; --radius:18px;
+    --shadow:0 1px 2px rgba(30,36,31,0.05), 0 6px 18px rgba(30,36,31,0.08);
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; background:var(--paper); color:var(--ink);
+    font-family:'Manrope',sans-serif; -webkit-font-smoothing:antialiased; overscroll-behavior-y:none; }
+  #root { max-width:480px; margin:0 auto; min-height:100vh; background:var(--paper); position:relative; box-shadow:0 0 40px rgba(0,0,0,0.06); }
+  button { font-family:inherit; cursor:pointer; }
+  button:focus-visible, [role="button"]:focus-visible, input:focus-visible { outline:2px solid var(--sage); outline-offset:2px; }
+  .display { font-family:'Fraunces',serif; letter-spacing:-0.01em; }
+
+  .app-header { position:sticky; top:0; z-index:20; background:var(--paper); padding:20px 20px 0; border-bottom:1px solid var(--line); }
+  .header-top { display:flex; align-items:flex-start; justify-content:space-between; }
+  .app-header .eyebrow { font-size:12px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--sage); margin:0 0 4px; }
+  .app-header h1 { font-size:25px; margin:0; font-weight:600; }
+  .cart-btn { background:var(--ink); color:var(--paper); border:none; border-radius:14px; width:46px; height:46px; font-size:20px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:var(--shadow); }
+  .cart-btn:active { transform:scale(0.94); }
+  .nav-tabs { display:flex; gap:18px; margin-top:14px; }
+  .nav-tabs button { background:none; border:none; padding:8px 0 12px; font-size:15px; font-weight:700; color:var(--ink-soft); border-bottom:3px solid transparent; }
+  .nav-tabs button.active { color:var(--ink); border-bottom-color:var(--sage); }
+
+  .content { padding:18px 20px 40px; }
+
+  .week-pager { display:flex; gap:8px; margin-bottom:18px; background:var(--paper-2); padding:5px; border-radius:14px; }
+  .week-pager button { flex:1; padding:11px; border-radius:10px; border:none; background:transparent; font-size:13.5px; font-weight:700; color:var(--ink-soft); }
+  .week-pager button.active { background:var(--white); color:var(--ink); box-shadow:var(--shadow); }
+
+  .week-subhead { display:flex; align-items:center; justify-content:space-between; margin:4px 0 14px; padding-bottom:8px; border-bottom:2px solid var(--ink); }
+  .week-subhead .wk-name { font-family:'Fraunces',serif; font-size:20px; font-weight:600; }
+  .week-subhead .wk-range { font-size:12px; color:var(--ink-soft); font-weight:600; }
+  .regen-btn { background:var(--white); border:1px solid var(--line); border-radius:10px; padding:7px 11px; font-size:12px; font-weight:700; color:var(--ink-soft); display:flex; align-items:center; gap:5px; }
+  .regen-btn:hover { background:var(--sage-pale); }
+
+  .day-block { margin-bottom:16px; border-radius:16px; padding:2px; transition:background 0.2s; }
+  .day-block.is-today { background:var(--sage-pale); padding:10px 10px 4px; box-shadow:inset 0 0 0 2px var(--sage); }
+  .day-block.is-past { opacity:0.62; }
+  .day-block.is-past .meal-card { background:var(--paper-2); }
+  .day-heading { display:flex; align-items:center; gap:8px; margin-bottom:8px; padding-left:2px; }
+  .day-heading .day-name { font-family:'Fraunces',serif; font-size:17px; font-weight:600; text-transform:capitalize; }
+  .day-heading .day-date { font-size:11.5px; color:var(--ink-soft); font-weight:600; }
+  .day-heading .today-pill { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; background:var(--sage); color:#fff; padding:2px 8px; border-radius:20px; }
+  .day-heading .past-pill { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); background:var(--paper-2); padding:2px 8px; border-radius:20px; }
+  .meal-row { display:flex; gap:10px; }
+
+  .meal-card { flex:1; background:var(--white); border:1px solid var(--line); border-radius:var(--radius); padding:10px 11px; text-align:left;
+    box-shadow:var(--shadow); display:flex; flex-direction:column; gap:5px; min-height:118px; position:relative; }
+  .meal-card.office { border-color:var(--blue); box-shadow:0 0 0 1px var(--blue), var(--shadow); }
+  .card-head { display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
+  .slot-label { font-size:10px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:var(--sage-light); }
+  .office-toggle { background:transparent; border:1px solid var(--line); border-radius:8px; width:26px; height:22px; font-size:12px; display:flex; align-items:center; justify-content:center; padding:0; opacity:0.5; }
+  .office-toggle.on { background:var(--blue); border-color:var(--blue); opacity:1; }
+  .meal-name { font-size:13.5px; font-weight:700; line-height:1.25; cursor:pointer; }
+  .meal-meta { display:flex; flex-wrap:wrap; gap:4px; font-size:10px; color:var(--ink-soft); font-weight:600; align-items:center; }
+  .tag { padding:1px 6px; border-radius:6px; font-weight:700; font-size:10px; }
+  .tag-fiber { background:var(--sage-pale); color:var(--sage); }
+  .tag-tupper { background:var(--blue-pale); color:var(--blue); }
+  .tag-indiv { background:var(--plum-pale); color:var(--plum); }
+  .tag-fish { background:#D7E8E6; color:#2B6E66; }
+  .card-actions { margin-top:auto; display:flex; gap:6px; padding-top:6px; border-top:1px solid var(--paper-2); }
+  .mini-btn { flex:1; background:var(--white); border:1px solid var(--line); border-radius:9px; padding:6px 4px; font-size:11px; font-weight:700; color:var(--ink-soft); display:flex; align-items:center; justify-content:center; gap:3px; }
+  .mini-btn.done { background:var(--sage); border-color:var(--sage); color:var(--white); }
+  .mini-btn.diners-on { background:var(--plum); border-color:var(--plum); color:var(--white); }
+  .meal-card.is-empty { border-style:dashed; background:rgba(255,255,255,0.4); justify-content:center; }
+  .meal-card.is-empty .meal-name { color:var(--ink-soft); font-weight:600; }
+  .meal-card.is-eatout { background:var(--coral-pale); border-color:transparent; }
+  .meal-card.is-eatout .slot-label { color:#B5512F; }
+  .meal-card.is-eatout .meal-name { color:#7A3920; }
+  .meal-card.is-custom { background:#F1EEE3; }
+
+  .create-btn { width:100%; margin-top:14px; padding:16px; background:var(--sage); color:var(--white); border:none; border-radius:var(--radius); font-size:15px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:var(--shadow); }
+  .create-btn:hover { background:#344A39; }
+  .create-btn.disabled { background:var(--paper-2); color:var(--ink-soft); cursor:default; box-shadow:none; }
+
+  .overlay { position:fixed; inset:0; z-index:50; display:flex; justify-content:center; }
+  .overlay-backdrop { position:absolute; inset:0; background:rgba(20,22,18,0.45); animation:fadeIn 0.18s ease; }
+  @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+  @keyframes slideUp { from{transform:translateY(100%);} to{transform:translateY(0);} }
+  .sheet { position:absolute; bottom:0; width:100%; max-width:480px; max-height:92vh; background:var(--paper); border-radius:26px 26px 0 0; overflow-y:auto; animation:slideUp 0.26s cubic-bezier(.2,.8,.25,1); padding-bottom:30px; }
+  .sheet-handle { width:38px; height:4px; background:var(--line); border-radius:4px; margin:12px auto 6px; }
+  .sheet-header { padding:4px 22px 16px; border-bottom:1px solid var(--line); }
+  .sheet-header .slot-label { font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--sage); }
+  .sheet-header h2 { font-family:'Fraunces',serif; font-size:23px; font-weight:600; margin:4px 0 0; }
+  .close-btn { position:absolute; top:14px; right:16px; background:var(--white); border:1px solid var(--line); width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--ink-soft); z-index:2; }
+  .badge-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .badge { font-size:11px; font-weight:700; padding:3px 9px; border-radius:8px; }
+  .badge.meal { background:var(--ink); color:var(--paper); }
+  .badge.fiber { background:var(--sage-pale); color:var(--sage); }
+  .badge.tupper { background:var(--blue-pale); color:var(--blue); }
+
+  .macro-row { display:flex; gap:10px; padding:16px 22px 4px; }
+  .macro-pill { flex:1; background:var(--white); border:1px solid var(--line); border-radius:14px; padding:10px 12px; text-align:center; }
+  .macro-pill .v { font-family:'Fraunces',serif; font-size:18px; font-weight:600; display:block; }
+  .macro-pill .l { font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; color:var(--ink-soft); }
+
+  .sheet-section { padding:18px 22px 0; }
+  .sheet-section h3 { font-size:13px; text-transform:uppercase; letter-spacing:0.07em; font-weight:800; color:var(--ink-soft); margin:0 0 10px; }
+  .note-box { border-radius:12px; padding:12px 14px; font-size:13px; line-height:1.5; }
+  .note-box.ruben { background:var(--plum-pale); color:#5A3F58; }
+  .note-box.tip { background:var(--sage-pale); color:var(--sage); }
+  .ing-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .ing-list li { font-size:13.5px; background:var(--white); border:1px solid var(--line); border-radius:12px; padding:9px 12px; }
+  .ing-name { font-weight:700; color:var(--ink); }
+  .pp { display:flex; flex-direction:column; gap:2px; margin-top:4px; }
+  .pp span { font-size:12px; font-weight:600; }
+  .pp .me { color:var(--sage); }
+  .pp .ruben { color:var(--plum); }
+  .pp .ck { color:var(--ink-soft); font-weight:500; }
+  .step-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:14px; }
+  .step-list li { display:flex; gap:12px; font-size:14px; line-height:1.5; }
+  .step-num { font-family:'Fraunces',serif; font-weight:600; font-size:14px; color:var(--sage); background:var(--sage-pale); width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+  .action-row { display:flex; gap:10px; padding:20px 22px 0; }
+  .action-btn { flex:1; padding:13px 8px; border-radius:14px; font-size:13px; font-weight:700; border:1px solid var(--line); background:var(--white); color:var(--ink); display:flex; align-items:center; justify-content:center; gap:6px; }
+  .action-btn:hover { background:var(--sage-pale); }
+  .action-btn.danger:hover { background:var(--coral-pale); }
+  .action-btn.primary { background:var(--sage); color:var(--white); border-color:var(--sage); }
+
+  .seg { display:flex; gap:6px; padding:0 22px; margin-top:12px; }
+  .seg button { flex:1; padding:10px; border-radius:10px; border:1px solid var(--line); background:var(--white); font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+  .seg button.active { background:var(--plum); color:var(--white); border-color:var(--plum); }
+
+  .search-input, .field-group input, .field-group textarea, .add-item-input {
+    width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:var(--white); font-size:14px; color:var(--ink); font-family:inherit; }
+  .search-input:focus, .field-group input:focus, .field-group textarea:focus, .add-item-input:focus { outline:none; border-color:var(--sage-light); }
+  .pick-filter { display:flex; gap:6px; margin:12px 0 4px; }
+  .pick-filter button { flex:1; padding:9px; border-radius:10px; border:1px solid var(--line); background:var(--white); font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+  .pick-filter button.active { background:var(--sage); color:var(--white); border-color:var(--sage); }
+  .recipe-pick-list { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .recipe-pick-item { display:flex; align-items:center; justify-content:space-between; background:var(--white); border:1px solid var(--line); border-radius:14px; padding:11px 14px; text-align:left; }
+  .recipe-pick-item .name { font-size:13.5px; font-weight:700; margin-bottom:3px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .recipe-pick-item .meta { font-size:11px; color:var(--ink-soft); font-weight:600; }
+  .mini-tag { font-size:9px; font-weight:800; padding:1px 5px; border-radius:5px; text-transform:uppercase; }
+  .mini-tag.comida { background:var(--coral-pale); color:#B5512F; }
+  .mini-tag.cena { background:var(--blue-pale); color:var(--blue); }
+  .mini-tag.fiber { background:var(--sage-pale); color:var(--sage); }
+  .mini-tag.fish { background:#D7E8E6; color:#2B6E66; }
+  .eatout-btn { width:100%; margin-top:14px; padding:14px; border-radius:14px; background:var(--coral-pale); border:1px solid transparent; color:#7A3920; font-weight:700; font-size:14px; }
+  .field-group { margin-bottom:14px; }
+  .field-group label { display:block; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); margin-bottom:6px; }
+  .empty-illustration { text-align:center; padding:24px 20px 10px; color:var(--ink-soft); font-size:14px; line-height:1.6; }
+
+  /* shopping */
+  .shop-progress { padding:14px 22px 0; }
+  .shop-progress .bar { height:8px; background:var(--paper-2); border-radius:8px; overflow:hidden; }
+  .shop-progress .fill { height:100%; background:var(--sage); transition:width 0.25s ease; }
+  .shop-progress .label { font-size:12px; font-weight:700; color:var(--ink-soft); margin-top:6px; }
+  .shop-legend { font-size:11.5px; color:var(--ink-soft); padding:4px 22px 0; line-height:1.5; }
+  .week-tabs { display:flex; gap:6px; padding:14px 22px 0; }
+  .week-tabs button { flex:1; padding:9px; border-radius:10px; border:1px solid var(--line); background:var(--white); font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+  .week-tabs button.active { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .shop-store { padding:18px 22px 0; }
+  .shop-store h4 { font-size:13px; font-weight:800; color:var(--ink); margin:0 0 3px; display:flex; align-items:center; gap:7px; }
+  .shop-store .sub { font-size:11px; color:var(--ink-soft); font-weight:600; margin:0 0 10px; }
+  .store-dot { width:10px; height:10px; border-radius:50%; }
+  .shop-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--white); border:1px solid var(--line); border-radius:12px; margin-bottom:7px; }
+  .shop-item .check { width:22px; height:22px; border-radius:7px; border:2px solid var(--sage-light); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px; color:var(--white); background:var(--white); cursor:pointer; }
+  .shop-item.done .check { background:var(--sage); border-color:var(--sage); }
+  .shop-item .txt { font-size:14px; flex:1; cursor:pointer; }
+  .shop-item .qty { font-weight:700; }
+  .shop-item.done .txt { text-decoration:line-through; color:var(--ink-soft); }
+  .shop-item .have-btn { background:transparent; border:1px solid var(--line); border-radius:8px; height:30px; padding:0 9px; font-size:11px; font-weight:700; color:var(--ink-soft); display:flex; align-items:center; gap:4px; flex-shrink:0; }
+  .shop-item .have-btn.on { background:var(--gold); border-color:var(--gold); color:var(--white); }
+  .shop-item .del { background:transparent; border:none; color:var(--ink-soft); font-size:16px; padding:0 4px; flex-shrink:0; }
+  .shop-item.have { opacity:0.55; }
+  .shop-item.have .txt { color:var(--ink-soft); text-decoration:none; }
+  .add-row { display:flex; gap:8px; padding:16px 22px 0; }
+  .add-row button { background:var(--sage); color:var(--white); border:none; border-radius:12px; padding:0 18px; font-weight:700; font-size:14px; }
+  .custom-note { margin:14px 22px 0; background:var(--paper-2); border-radius:12px; padding:12px 14px; font-size:13px; line-height:1.5; color:var(--ink-soft); }
+
+  /* popup creación */
+  .pop-day { padding:14px 22px; border-bottom:1px solid var(--line); }
+  .pop-day .pd-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .pop-day .pd-name { font-weight:700; font-size:15px; }
+  .pop-day .pd-date { font-size:11.5px; color:var(--ink-soft); font-weight:600; }
+  .office-chk { display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; color:var(--ink-soft); background:var(--white); border:1px solid var(--line); border-radius:10px; padding:6px 10px; }
+  .office-chk.on { background:var(--blue); border-color:var(--blue); color:var(--white); }
+  .office-chk.disabled { opacity:0.5; }
+  .pop-line { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .pop-line .pl-label { font-size:12px; font-weight:700; color:var(--ink-soft); width:62px; flex-shrink:0; }
+  .pop-opts { display:flex; gap:5px; flex:1; }
+  .pop-opts button { flex:1; padding:7px 2px; border-radius:8px; border:1px solid var(--line); background:var(--white); font-size:11px; font-weight:700; color:var(--ink-soft); }
+  .pop-opts button.active { background:var(--coral); border-color:var(--coral); color:var(--white); }
+
+  /* dashboard */
+  .dash-cards { display:flex; gap:10px; flex-wrap:wrap; }
+  .dash-card { flex:1; min-width:46%; background:var(--white); border:1px solid var(--line); border-radius:16px; padding:14px; box-shadow:var(--shadow); }
+  .dash-card .v { font-family:'Fraunces',serif; font-size:26px; font-weight:600; }
+  .dash-card .v small { font-size:15px; color:var(--ink-soft); }
+  .dash-card .l { font-size:11px; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; color:var(--ink-soft); margin-top:2px; }
+  .dash-section { margin-top:22px; }
+  .dash-section h3 { font-size:13px; text-transform:uppercase; letter-spacing:0.06em; font-weight:800; color:var(--ink-soft); margin:0 0 12px; }
+  .split-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .split-row .sr-label { width:70px; font-size:13px; font-weight:700; }
+  .split-bar { flex:1; height:24px; background:var(--paper-2); border-radius:8px; overflow:hidden; }
+  .split-bar .sfill { height:100%; border-radius:8px; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:var(--white); font-size:11px; font-weight:700; }
+  .dow-chart { display:flex; align-items:flex-end; gap:6px; height:120px; padding-top:8px; }
+  .dow-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
+  .dow-bar { width:100%; background:var(--sage); border-radius:6px 6px 0 0; min-height:3px; }
+  .dow-lbl { font-size:10px; font-weight:700; color:var(--ink-soft); }
+  .dow-val { font-size:10px; font-weight:700; color:var(--sage); }
+  .dash-empty { text-align:center; padding:30px 20px; color:var(--ink-soft); font-size:14px; line-height:1.6; }
+
+  /* editor de ingredientes */
+  .ed-row { background:var(--white); border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px; }
+  .ed-line { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+  .ed-line:last-child { margin-bottom:0; }
+  .ed-name { flex:1; padding:9px 10px; border-radius:9px; border:1px solid var(--line); font-size:14px; font-family:inherit; }
+  .ed-qty { width:72px; padding:9px 8px; border-radius:9px; border:1px solid var(--line); font-size:14px; font-family:inherit; }
+  .ed-sel { padding:9px 6px; border-radius:9px; border:1px solid var(--line); font-size:13px; font-family:inherit; background:var(--white); }
+  .ed-sel.wide { flex:1; }
+  .ed-del { width:34px; height:34px; border-radius:9px; border:1px solid var(--line); background:var(--white); color:var(--coral); font-size:15px; flex-shrink:0; }
+  .ed-add { width:100%; padding:12px; border-radius:12px; border:1.5px dashed var(--sage-light); background:transparent; color:var(--sage); font-weight:700; font-size:14px; margin-top:4px; }
+
+  /* gastos */
+  .exp-add { background:var(--white); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:var(--shadow); }
+  .exp-add h3 { font-size:13px; text-transform:uppercase; letter-spacing:0.06em; font-weight:800; color:var(--ink-soft); margin:0 0 12px; }
+  .store-pick { display:flex; gap:8px; margin-bottom:12px; }
+  .store-pick button { flex:1; padding:10px 4px; border-radius:10px; border:1px solid var(--line); background:var(--white); font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+  .store-pick button.active { color:var(--white); border-color:transparent; }
+  .exp-fields { display:flex; gap:8px; margin-bottom:12px; }
+  .exp-fields input { padding:11px 12px; border-radius:10px; border:1px solid var(--line); font-size:14px; font-family:inherit; }
+  .exp-fields .amount { flex:1; }
+  .exp-add .add-exp-btn { width:100%; padding:13px; border-radius:12px; border:none; background:var(--sage); color:var(--white); font-weight:700; font-size:14px; }
+  .period-nav { display:flex; align-items:center; justify-content:space-between; margin:20px 0 12px; }
+  .period-nav .seg2 { display:flex; gap:6px; background:var(--paper-2); padding:4px; border-radius:10px; }
+  .period-nav .seg2 button { padding:7px 14px; border-radius:8px; border:none; background:transparent; font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+  .period-nav .seg2 button.active { background:var(--white); color:var(--ink); box-shadow:var(--shadow); }
+  .period-label { display:flex; align-items:center; gap:6px; }
+  .period-label button { width:30px; height:30px; border-radius:50%; border:1px solid var(--line); background:var(--white); font-size:14px; }
+  .period-label .pl-txt { font-size:13px; font-weight:700; min-width:96px; text-align:center; }
+  .exp-total { background:var(--ink); color:var(--paper); border-radius:16px; padding:18px; text-align:center; margin-bottom:12px; }
+  .exp-total .v { font-family:'Fraunces',serif; font-size:32px; font-weight:600; }
+  .exp-total .l { font-size:11px; text-transform:uppercase; letter-spacing:0.06em; font-weight:700; opacity:0.7; }
+  .exp-store-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .exp-store-row .esr-label { display:flex; align-items:center; gap:7px; width:110px; font-size:13px; font-weight:700; }
+  .exp-store-row .esr-bar { flex:1; height:22px; background:var(--paper-2); border-radius:8px; overflow:hidden; }
+  .exp-store-row .esr-fill { height:100%; border-radius:8px; }
+  .exp-store-row .esr-val { font-size:13px; font-weight:700; width:70px; text-align:right; }
+  .exp-list-item { display:flex; align-items:center; gap:10px; padding:11px 12px; background:var(--white); border:1px solid var(--line); border-radius:12px; margin-bottom:7px; }
+  .exp-list-item .eli-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .exp-list-item .eli-store { font-size:13.5px; font-weight:700; flex:1; }
+  .exp-list-item .eli-date { font-size:11.5px; color:var(--ink-soft); font-weight:600; }
+  .exp-list-item .eli-amount { font-size:14px; font-weight:700; }
+  .exp-list-item .del { background:transparent; border:none; color:var(--ink-soft); font-size:15px; padding:0 2px; }
+
+  /* selector día de inicio */
+  .dow-pick { display:flex; gap:5px; padding:0 22px; margin-top:12px; flex-wrap:wrap; }
+  .dow-pick button { flex:1; min-width:38px; padding:9px 2px; border-radius:10px; border:1px solid var(--line); background:var(--white); font-size:12px; font-weight:700; color:var(--ink-soft); }
+  .dow-pick button.active { background:var(--sage); border-color:var(--sage); color:#fff; }
+  .start-info { padding:8px 22px 0; font-size:12.5px; color:var(--sage); font-weight:700; }
+  /* notas compra */
+  .notes-area { width:100%; margin-top:8px; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:var(--white); font-size:14px; font-family:inherit; resize:vertical; min-height:70px; }
+  .item-edit { flex:1; padding:8px 10px; border-radius:9px; border:1px solid var(--sage-light); font-size:14px; font-family:inherit; }
+  .icon-btn { background:transparent; border:none; color:var(--ink-soft); font-size:14px; padding:0 5px; flex-shrink:0; }
+
+  @media (prefers-reduced-motion: reduce) { .sheet, .overlay-backdrop, .shop-progress .fill { animation:none; transition:none; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useMemo, useEffect } = React;
+
+// ---- Personas y reparto de cantidades ----
+// Yo: déficit (menos hidratos), proteína alta. Rubén: mantenimiento (más hidratos), proteína alta.
+// share = fracción del total "para 2" que corresponde a cada persona, por tipo de ingrediente.
+const SHARE = {
+  P:  { me:0.47, ruben:0.53 },  // proteína (alta para ambos)
+  C:  { me:0.40, ruben:0.60 },  // hidratos (yo menos)
+  V:  { me:0.52, ruben:0.48 },  // verdura
+  Ft: { me:0.46, ruben:0.54 },  // grasa
+  O:  { me:0.50, ruben:0.50 }   // otros
+};
+const PERSON_NAME = { me:"Yo", ruben:"Rubén" };
+
+// tiendas
+const F="fruteria", M="mercado", X="mercadona";
+const STORE_ORDER = ["fruteria","mercado","mercadona"];
+const STORE_INFO = {
+  fruteria:{ label:"Frutería", sub:"Fruta y verdura", color:"#6B8A6E" },
+  mercado:{ label:"Mercado", sub:"Carne y pescado", color:"#B5512F" },
+  mercadona:{ label:"Mercadona", sub:"Resto de productos", color:"#4A6B82" }
+};
+const WEIGH = u => u === "g" || u === "ml";
+
+// ingrediente: G(display, nombre, cantidadTotalPara2, unidad, rol, tienda, factorCocido?, noLeGustaA?)
+const G = (d, n, q, u, r, s, ck, dis) => ({ d, n, q, u, r, s, ck, dis });
+// condimento de despensa: S(display, [items atómicos]) -> siempre Mercadona, al gusto
+const S = (d, items) => ({ d, staple:true, items });
+
+const RECIPE_BANK = [
+  // ===== COMIDAS (lunch) =====
+  { id:"r1", name:"Pollo al limón con boniato asado", slot:"lunch", time:30, kcal:480, protein:42, fiberRich:false, tupper:true,
+    ingredients:[
+      G("Pechuga de pollo (300g)","Pechuga de pollo",300,"g","P",M),
+      G("2 boniatos","Boniato",2,"ud","C",F),
+      G("1 limón","Limón",1,"ud","V",F),
+      S("Aceite de oliva",["Aceite de oliva"]),S("Pimentón",["Pimentón"]),S("Sal y pimienta",["Sal","Pimienta"])],
+    steps:["Precalienta el horno a 200°C.","Corta los boniatos en cuñas con aceite, sal y pimentón. Hornéalos 15 min.","Sazona el pollo con sal, pimienta y zumo de medio limón.","Añade el pollo a la bandeja y hornea 15-18 min más.","Sirve con el resto del limón."] },
+
+  { id:"r2", name:"Lentejas estofadas con verduras", slot:"lunch", time:35, kcal:410, protein:24, fiberRich:true, tupper:true,
+    ingredients:[
+      G("250g de lentejas","Lentejas",250,"g","P",X,2.4),
+      G("1 zanahoria","Zanahoria",1,"ud","V",F),
+      G("1 cebolla","Cebolla",1,"ud","V",F),
+      G("1 tomate","Tomate",1,"ud","V",F,null,"ruben"),
+      S("Aceite, sal, pimentón y laurel",["Aceite de oliva","Sal","Pimentón","Laurel"])],
+    steps:["Pica la cebolla, zanahoria y tomate.","Sofríe la cebolla y zanahoria 5 min.","Añade el tomate y el pimentón, 2 min.","Agrega las lentejas, el laurel y agua hasta cubrir.","Cocina 25-30 min. Sazona al final."] },
+
+  { id:"r3", name:"Garbanzos guisados con espinacas", slot:"lunch", time:25, kcal:430, protein:26, fiberRich:true, tupper:true,
+    rubenNote:"Lleva tomate triturado. Para Rubén puedes guisar su parte con un poco más de caldo o agua en vez de tomate.",
+    ingredients:[
+      G("1 bote de garbanzos cocidos (400g)","Garbanzos cocidos",1,"bote","P",X),
+      G("200g de espinacas","Espinacas",200,"g","V",F),
+      G("200g de tomate triturado","Tomate triturado",200,"g","O",X),
+      G("1 diente de ajo","Ajo",1,"diente","V",F),
+      S("Comino, aceite y sal",["Comino","Aceite de oliva","Sal"])],
+    steps:["Sofríe el ajo picado en aceite.","Añade el tomate triturado y el comino, 3 min.","Incorpora los garbanzos escurridos, 5 min.","Añade las espinacas hasta que se reduzcan.","Sazona y sirve."] },
+
+  { id:"r4", name:"Estofado de judías blancas con verduras", slot:"lunch", time:25, kcal:400, protein:23, fiberRich:true, tupper:true,
+    rubenNote:"Lleva tomate triturado. Para Rubén, sustitúyelo por más calabacín y un poco de caldo.",
+    ingredients:[
+      G("1 bote de judías blancas (400g)","Judías blancas cocidas",1,"bote","P",X),
+      G("1 calabacín","Calabacín",1,"ud","V",F),
+      G("1 zanahoria","Zanahoria",1,"ud","V",F),
+      G("200g de tomate triturado","Tomate triturado",200,"g","O",X),
+      S("Pimentón, aceite y sal",["Pimentón","Aceite de oliva","Sal"])],
+    steps:["Trocea el calabacín y la zanahoria.","Sofríelos 6-7 min.","Añade el tomate y el pimentón, 3 min.","Incorpora las judías y un poco de agua.","Cocina 8-10 min. Sazona."] },
+
+  { id:"r5", name:"Pasta integral con pavo y tomate", slot:"lunch", time:25, kcal:560, protein:40, fiberRich:false, tupper:true,
+    rubenNote:"La salsa lleva tomate. Para Rubén, saltea el pavo con calabacín y cebolla en vez de salsa de tomate.",
+    ingredients:[
+      G("200g de pasta integral","Pasta integral",200,"g","C",X,2.2),
+      G("250g de carne picada de pavo","Carne picada de pavo",250,"g","P",M),
+      G("400g de tomate triturado","Tomate triturado",400,"g","O",X),
+      G("1 diente de ajo","Ajo",1,"diente","V",F),
+      S("Aceite, sal y orégano",["Aceite de oliva","Sal","Orégano"])],
+    steps:["Cuece la pasta según el paquete.","Dora el ajo en aceite.","Añade el pavo, 5-6 min.","Agrega el tomate, sal y orégano, 10 min.","Mezcla con la pasta."] },
+
+  { id:"r6", name:"Lomo de cerdo con puré de patata", slot:"lunch", time:30, kcal:540, protein:44, fiberRich:false, tupper:true,
+    ingredients:[
+      G("Lomo de cerdo (300g)","Lomo de cerdo",300,"g","P",M),
+      G("4 patatas","Patata",4,"ud","C",F),
+      G("50ml de leche","Leche",50,"ml","O",X),
+      S("Mantequilla o aceite",["Mantequilla"]),
+      S("Sal, pimienta y ajo en polvo",["Sal","Pimienta","Ajo en polvo"])],
+    steps:["Hierve las patatas 20 min.","Aplástalas con la leche y la mantequilla.","Sazona el lomo y cocínalo a la plancha 3-4 min por lado.","Sirve con el puré."] },
+
+  { id:"r7", name:"Bowl de quinoa con pollo y verduras", slot:"lunch", time:25, kcal:500, protein:39, fiberRich:false, tupper:true,
+    ingredients:[
+      G("150g de quinoa","Quinoa",150,"g","C",X,3.0),
+      G("Pechuga de pollo (300g)","Pechuga de pollo",300,"g","P",M),
+      G("1 pimiento","Pimiento",1,"ud","V",F),
+      G("1 calabacín","Calabacín",1,"ud","V",F),
+      S("Aceite, sal y especias",["Aceite de oliva","Sal"])],
+    steps:["Cuece la quinoa (15 min).","Corta y sazona el pollo, cocínalo 6-7 min.","Añade pimiento y calabacín, 5-6 min.","Sirve sobre la quinoa."] },
+
+  { id:"r8", name:"Wok de ternera con verduras", slot:"lunch", time:20, kcal:480, protein:41, fiberRich:false, tupper:true,
+    ingredients:[
+      G("300g de tiras de ternera","Tiras de ternera",300,"g","P",M),
+      G("1 pimiento","Pimiento",1,"ud","V",F),
+      G("1 cebolla","Cebolla",1,"ud","V",F),
+      S("Salsa de soja",["Salsa de soja"]),S("Aceite de sésamo o oliva",["Aceite de oliva"])],
+    steps:["Corta pimiento y cebolla en tiras.","Calienta el aceite a fuego alto.","Saltea la ternera 3-4 min y reserva.","Saltea las verduras 4-5 min.","Devuelve la carne, añade soja, 1 min."] },
+
+  { id:"r9", name:"Pollo relleno de queso y jamón", slot:"lunch", time:30, kcal:460, protein:45, fiberRich:false, tupper:true,
+    ingredients:[
+      G("Pechugas de pollo (350g)","Pechuga de pollo",350,"g","P",M),
+      G("4 lonchas de jamón cocido","Jamón cocido",4,"loncha","P",M),
+      G("4 lonchas de queso bajo en grasa","Queso bajo en grasa",4,"loncha","P",X),
+      S("Aceite, sal, pimienta y orégano",["Aceite de oliva","Sal","Pimienta","Orégano"])],
+    steps:["Horno a 200°C.","Abre las pechugas y rellénalas con jamón y queso.","Cierra con palillo y sazona.","Hornea 20-25 min."] },
+
+  { id:"r10", name:"Hamburguesa casera de ternera con ensalada", slot:"lunch", time:20, kcal:540, protein:38, fiberRich:false, tupper:false,
+    ingredients:[
+      G("300g de carne picada de ternera","Carne picada de ternera",300,"g","P",M),
+      G("2 panes de hamburguesa integrales","Pan de hamburguesa integral",2,"ud","C",X),
+      G("1 tomate","Tomate",1,"ud","V",F,null,"ruben"),
+      G("1 lechuga pequeña","Lechuga",1,"ud","V",F),
+      G("1 cebolla","Cebolla",1,"ud","V",F),
+      S("Aceite, sal y pimienta",["Aceite de oliva","Sal","Pimienta"])],
+    steps:["Salpimenta la carne y forma 2 hamburguesas.","Cocínalas 4-5 min por lado.","Tuesta los panes.","Monta con lechuga, tomate y cebolla."] },
+
+  { id:"r11", name:"Pizza casera con verduras", slot:"lunch", time:25, kcal:560, protein:30, fiberRich:false, tupper:false,
+    rubenNote:"La base lleva tomate. Para Rubén, usa base de crème fraîche ligera o solo queso y verduras.",
+    ingredients:[
+      G("1 base de pizza integral","Base de pizza integral",1,"ud","C",X),
+      G("150g de tomate triturado","Tomate triturado",150,"g","O",X),
+      G("100g de queso rallado","Queso rallado",100,"g","P",X),
+      G("1 pimiento","Pimiento",1,"ud","V",F),
+      G("100g de champiñones","Champiñones",100,"g","V",F),
+      S("Orégano y aceite",["Orégano","Aceite de oliva"])],
+    steps:["Horno a 220°C.","Extiende el tomate sobre la base.","Reparte queso y verduras laminadas.","Añade orégano y aceite.","Hornea 12-15 min."] },
+
+  { id:"r12", name:"Dorada al horno con patatas", slot:"lunch", time:30, kcal:430, protein:36, fiberRich:false, tupper:true, fish:true,
+    ingredients:[
+      G("2 doradas limpias","Dorada",2,"ud","P",M),
+      G("3 patatas","Patata",3,"ud","C",F),
+      G("1 cebolla","Cebolla",1,"ud","V",F),
+      G("1 limón","Limón",1,"ud","V",F),
+      S("Aceite y sal",["Aceite de oliva","Sal"])],
+    steps:["Horno a 200°C.","Patata y cebolla en rodajas en la base, 15 min.","Coloca la dorada y el limón encima.","Hornea 15-18 min más."] },
+
+  { id:"r13", name:"Salmón con quinoa y brócoli", slot:"lunch", time:25, kcal:560, protein:42, fiberRich:false, tupper:true, fish:true,
+    ingredients:[
+      G("Salmón (300g)","Salmón",300,"g","P",M),
+      G("150g de quinoa","Quinoa",150,"g","C",X,3.0),
+      G("1 brócoli","Brócoli",1,"ud","V",F),
+      S("Aceite, sal y limón",["Aceite de oliva","Sal"])],
+    steps:["Cuece la quinoa.","Brócoli al vapor 5-6 min.","Salmón a la plancha 3-4 min por lado.","Sirve junto con un toque de limón."] },
+
+  { id:"r14", name:"Arroz integral con pollo y verduras", slot:"lunch", time:30, kcal:520, protein:38, fiberRich:false, tupper:true,
+    ingredients:[
+      G("150g de arroz integral","Arroz integral",150,"g","C",X,2.8),
+      G("Pechuga de pollo (300g)","Pechuga de pollo",300,"g","P",M),
+      G("1 pimiento","Pimiento",1,"ud","V",F),
+      G("100g de guisantes","Guisantes",100,"g","V",F),
+      G("1 diente de ajo","Ajo",1,"diente","V",F),
+      S("Aceite y sal",["Aceite de oliva","Sal"])],
+    steps:["Cuece el arroz integral.","Dora el pollo con aceite y ajo.","Añade pimiento y guisantes, 6-7 min.","Mezcla con el arroz."] },
+
+  { id:"r15", name:"Ensalada completa de pollo, manzana y nueces", slot:"lunch", time:15, kcal:470, protein:36, fiberRich:true, tupper:false,
+    ingredients:[
+      G("250g de pechuga de pollo","Pechuga de pollo",250,"g","P",M),
+      G("1 manzana","Manzana",1,"ud","V",F),
+      G("30g de nueces","Nueces",30,"g","Ft",X),
+      G("1 bolsa de mezcla de ensalada","Mezcla de ensalada",1,"bolsa","V",F),
+      G("50g de queso fresco","Queso fresco",50,"g","P",X),
+      S("Aceite, vinagre y sal",["Aceite de oliva","Vinagre","Sal"])],
+    steps:["Cocina el pollo y córtalo en tiras.","Pon la ensalada en un bol.","Añade manzana en dados y nueces.","Incorpora pollo y queso fresco.","Aliña."] },
+
+  // ===== CENAS (dinner) =====
+  { id:"r16", name:"Tortilla de claras con champiñones", slot:"dinner", time:15, kcal:320, protein:30, fiberRich:false, tupper:true,
+    ingredients:[
+      G("8 huevos (claras)","Huevos",8,"ud","P",X),
+      G("200g de champiñones","Champiñones",200,"g","V",F),
+      S("Aceite, sal, pimienta y perejil",["Aceite de oliva","Sal","Pimienta","Perejil"])],
+    steps:["Saltea los champiñones laminados 5 min.","Bate las claras con sal y pimienta.","Viértelas y cocina 4-5 min sin remover.","Dobla y sirve."] },
+
+  { id:"r17", name:"Revuelto de huevos con espinacas y queso fresco", slot:"dinner", time:12, kcal:380, protein:28, fiberRich:false, tupper:true,
+    ingredients:[
+      G("4 huevos","Huevos",4,"ud","P",X),
+      G("150g de espinacas frescas","Espinacas",150,"g","V",F),
+      G("80g de queso fresco batido o requesón","Queso fresco batido o requesón",80,"g","P",X),
+      S("Aceite, sal y pimienta",["Aceite de oliva","Sal","Pimienta"])],
+    steps:["Saltea las espinacas 2 min.","Bate los huevos y viértelos.","Remueve 2-3 min.","Mezcla con el queso fresco."] },
+
+  { id:"r18", name:"Ensalada de garbanzos con atún", slot:"dinner", time:10, kcal:420, protein:32, fiberRich:true, tupper:false, fish:true,
+    ingredients:[
+      G("1 bote de garbanzos cocidos (400g)","Garbanzos cocidos",1,"bote","P",X),
+      G("2 latas de atún al natural","Atún al natural",2,"lata","P",M),
+      G("1 tomate","Tomate",1,"ud","V",F,null,"ruben"),
+      G("1/2 cebolla morada","Cebolla morada",1,"ud","V",F),
+      S("Aceite, vinagre y sal",["Aceite de oliva","Vinagre","Sal"])],
+    steps:["Escurre los garbanzos.","Corta tomate y cebolla pequeños.","Mezcla garbanzos, tomate, cebolla y atún.","Aliña."] },
+
+  { id:"r19", name:"Crema de calabaza con pollo desmenuzado", slot:"dinner", time:30, kcal:390, protein:30, fiberRich:false, tupper:true, isPuree:true,
+    ingredients:[
+      G("500g de calabaza","Calabaza",500,"g","V",F),
+      G("Pechuga de pollo cocida (200g)","Pechuga de pollo",200,"g","P",M),
+      G("1/2 cebolla","Cebolla",1,"ud","V",F),
+      G("300ml de caldo de verduras","Caldo de verduras",300,"ml","O",X),
+      S("Sal y pimienta",["Sal","Pimienta"])],
+    steps:["Cuece calabaza y cebolla en el caldo 20 min.","Tritura hasta crema fina.","Sazona.","Añade el pollo desmenuzado al servir."] },
+
+  { id:"r20", name:"Puré de verduras con huevo cocido", slot:"dinner", time:30, kcal:340, protein:18, fiberRich:false, tupper:true, isPuree:true,
+    ingredients:[
+      G("2 patatas","Patata",2,"ud","C",F),
+      G("2 zanahorias","Zanahoria",2,"ud","V",F),
+      G("1 calabacín","Calabacín",1,"ud","V",F),
+      G("1 puerro","Puerro",1,"ud","V",F),
+      G("2 huevos","Huevos",2,"ud","P",X),
+      G("400ml de caldo de verduras","Caldo de verduras",400,"ml","O",X),
+      S("Aceite y sal",["Aceite de oliva","Sal"])],
+    steps:["Trocea las verduras.","Cuécelas en el caldo 20 min.","Cuece los huevos 10 min aparte.","Tritura las verduras.","Sirve con el huevo en cuartos."] },
+
+  { id:"r21", name:"Crema de calabacín y puerro con pavo", slot:"dinner", time:25, kcal:330, protein:22, fiberRich:false, tupper:true, isPuree:true,
+    ingredients:[
+      G("2 calabacines","Calabacín",2,"ud","V",F),
+      G("1 puerro","Puerro",1,"ud","V",F),
+      G("1 patata","Patata",1,"ud","C",F),
+      G("100g de pavo en lonchas","Pavo en lonchas",100,"g","P",M),
+      G("400ml de caldo de verduras","Caldo de verduras",400,"ml","O",X),
+      S("Sal y pimienta",["Sal","Pimienta"])],
+    steps:["Trocea calabacín, puerro y patata.","Cuécelos 18 min.","Tritura.","Sazona.","Sirve con el pavo en tiras."] },
+
+  { id:"r22", name:"Quiche vegetal", slot:"dinner", time:40, kcal:420, protein:24, fiberRich:false, tupper:true,
+    ingredients:[
+      G("1 masa quebrada","Masa quebrada",1,"ud","C",X),
+      G("3 huevos","Huevos",3,"ud","P",X),
+      G("100ml de leche evaporada o nata ligera","Leche evaporada o nata ligera",100,"ml","O",X),
+      G("150g de espinacas","Espinacas",150,"g","V",F),
+      G("1 calabacín","Calabacín",1,"ud","V",F),
+      G("50g de queso rallado","Queso rallado",50,"g","P",X),
+      S("Sal y pimienta",["Sal","Pimienta"])],
+    steps:["Horno a 190°C, forra un molde con la masa.","Saltea calabacín y espinacas 5 min.","Bate huevos con leche, sal y pimienta.","Reparte verduras y vierte el batido.","Añade queso y hornea 25-30 min."] },
+
+  { id:"r23", name:"Ensalada templada de aguacate, huevo y tomate", slot:"dinner", time:15, kcal:380, protein:20, fiberRich:true, tupper:false,
+    ingredients:[
+      G("1 aguacate","Aguacate",1,"ud","Ft",F),
+      G("2 huevos","Huevos",2,"ud","P",X),
+      G("1 tomate","Tomate",1,"ud","V",F,null,"ruben"),
+      G("1 bolsa de canónigos","Canónigos",1,"bolsa","V",F),
+      S("Aceite, vinagre y sal",["Aceite de oliva","Vinagre","Sal"])],
+    steps:["Cuece los huevos 10 min.","Pon los canónigos en un bol.","Añade aguacate y tomate en dados.","Incorpora los huevos.","Aliña."] },
+
+  { id:"r24", name:"Tostadas integrales con aguacate y huevo", slot:"dinner", time:12, kcal:400, protein:21, fiberRich:true, tupper:false,
+    ingredients:[
+      G("4 rebanadas de pan integral","Pan integral",4,"rebanada","C",X),
+      G("1 aguacate","Aguacate",1,"ud","Ft",F),
+      G("2 huevos","Huevos",2,"ud","P",X),
+      S("Sal, pimienta y limón",["Sal","Pimienta"])],
+    steps:["Tuesta el pan.","Aplasta el aguacate con sal, pimienta y limón.","Repártelo sobre las tostadas.","Cocina los huevos y colócalos encima."] },
+
+  { id:"r25", name:"Ensalada de lentejas con verduras y huevo", slot:"dinner", time:15, kcal:390, protein:24, fiberRich:true, tupper:false,
+    ingredients:[
+      G("1 bote de lentejas cocidas (400g)","Lentejas cocidas",1,"bote","P",X),
+      G("1 tomate","Tomate",1,"ud","V",F,null,"ruben"),
+      G("1/2 pimiento","Pimiento",1,"ud","V",F),
+      G("1/4 de cebolla","Cebolla",1,"ud","V",F),
+      G("1 huevo cocido","Huevos",1,"ud","P",X),
+      S("Aceite, vinagre y sal",["Aceite de oliva","Vinagre","Sal"])],
+    steps:["Escurre las lentejas.","Pica tomate, pimiento y cebolla.","Mézclalos con las lentejas.","Añade el huevo en cuartos.","Aliña."] },
+
+  { id:"r26", name:"Salmón a la plancha con ensalada", slot:"dinner", time:18, kcal:420, protein:34, fiberRich:false, tupper:false, fish:true,
+    ingredients:[
+      G("250g de salmón","Salmón",250,"g","P",M),
+      G("1 bolsa de ensalada variada","Ensalada variada",1,"bolsa","V",F),
+      G("1 tomate","Tomate",1,"ud","V",F,null,"ruben"),
+      S("Aceite, limón y sal",["Aceite de oliva","Sal"])],
+    steps:["Sazona el salmón.","Plancha 3-4 min por lado.","Prepara la ensalada con el tomate.","Sirve el salmón encima."] },
+
+  { id:"r27", name:"Merluza rebozada con ensalada", slot:"dinner", time:25, kcal:440, protein:35, fiberRich:false, tupper:false, fish:true,
+    ingredients:[
+      G("2 lomos de merluza","Merluza",2,"ud","P",M),
+      G("1 huevo para rebozar","Huevos",1,"ud","P",X),
+      G("60g de pan rallado","Pan rallado",60,"g","C",X),
+      G("1 bolsa de ensalada variada","Ensalada variada",1,"bolsa","V",F),
+      G("1 limón","Limón",1,"ud","V",F),
+      S("Aceite y sal",["Aceite de oliva","Sal"])],
+    steps:["Salpimenta la merluza.","Pásala por huevo batido y pan rallado.","Fríela en aceite caliente 2-3 min por lado.","Escurre en papel.","Sirve con ensalada y limón."] }
+];
+
+const SLOTS = [ { key:"lunch", label:"Comida" }, { key:"dinner", label:"Cena" } ];
+const DAY_NAMES = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+const UNIT_LABEL = { g:"g", ml:"ml", ud:"ud", lata:"lata(s)", bote:"bote(s)", diente:"dientes", rebanada:"rebanadas", loncha:"lonchas", bolsa:"bolsa(s)" };
+
+function getRecipeById(id){ return RECIPE_BANK.find(r => r.id === id); }
+
+// ---- fechas ----
+function startOfWeek(date){ const d=new Date(date); const day=d.getDay(); const diff=day===0?-6:1-day; d.setDate(d.getDate()+diff); d.setHours(0,0,0,0); return d; }
+function fmtDate(d){ return d.toLocaleDateString("es-ES",{day:"numeric",month:"short"}); }
+function isSameDay(a,b){ return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
+function dateKey(d){ return d.toISOString().slice(0,10); }
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+// Oficina: válido salvo julio (mes 6) y agosto (mes 7) -> jornada intensiva en casa
+function officeAllowed(date){ const m=date.getMonth(); return !(m===6||m===7); }
+const DOW_FULL = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+function dayLabel(d){ return DOW_FULL[d.getDay()]; }
+function startOfToday(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
+// día de la semana elegido más reciente en o antes de 'from'
+function mostRecentDow(from, dow){ const d=new Date(from); d.setHours(0,0,0,0); const delta=(d.getDay()-dow+7)%7; return addDays(d,-delta); }
+// día de la semana elegido más cercano a 'anchor' (para la próxima semana, ~+7)
+function nearestDow(anchor, dow){ const d=new Date(anchor); d.setHours(0,0,0,0); for(let off=0; off<=3; off++){ if(addDays(d,off).getDay()===dow) return addDays(d,off); if(addDays(d,-off).getDay()===dow) return addDays(d,-off); } return d; }
+
+// ---- porciones por persona ----
+function personRaw(ing, person){ return Math.round(ing.q * SHARE[ing.r][person]); }
+function personsOf(entry){ return entry.diners==="me"?["me"]:entry.diners==="ruben"?["ruben"]:["me","ruben"]; }
+
+function shopQty(ing, persons){
+  const eaters = persons.filter(p => ing.dis !== p);
+  if(!eaters.length) return 0;
+  if(WEIGH(ing.u)){ let g=0; eaters.forEach(p=> g+=ing.q*SHARE[ing.r][p]); return Math.round(g); }
+  return Math.max(1, Math.round(ing.q * eaters.length/2));
+}
+
+// ---- generador ----
+function seededRng(seedStr){ let seed=0; for(let i=0;i<seedStr.length;i++) seed=(seed*31+seedStr.charCodeAt(i))>>>0; return ()=>{ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; }; }
+function shuffle(arr,rng){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function defaultConfig(){ return Array.from({length:7},()=>({office:false,comida:"none",cena:"none"})); }
+function dinersFromOut(out){ return out==="yo"?"ruben":out==="ruben"?"me":"both"; }
+function recipeCells(plan){ return Object.keys(plan).filter(k=>plan[k]&&plan[k].type==="recipe"); }
+
+function generatePlan(seedStr, weekStart, config){
+  const rng = seededRng(seedStr);
+  const lunchAll = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"), rng);
+  const lunchTup = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"&&r.tupper), rng);
+  const dinnerAll = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"), rng);
+  const usedL=new Set(), usedD=new Set();
+  const Lref={v:0}, LTref={v:0}, Dref={v:0};
+  function pull(arr, ref, used){
+    for(let k=0;k<arr.length;k++){ const r=arr[(ref.v+k)%arr.length]; if(!used.has(r.id)){ ref.v=(ref.v+k+1)%arr.length; used.add(r.id); return r; } }
+    const r=arr[ref.v%arr.length]; ref.v=(ref.v+1)%arr.length; return r;
+  }
+  const cfg = config || defaultConfig();
+  const plan = {};
+  for(let d=0; d<7; d++){
+    const c = cfg[d] || {office:false,comida:"none",cena:"none"};
+    const date = addDays(weekStart, d);
+    const offOk = !!c.office && officeAllowed(date);
+    if(c.comida==="ambos"){ plan[d+"_lunch"]={type:"eatout"}; }
+    else { const r = offOk ? pull(lunchTup,LTref,usedL) : pull(lunchAll,Lref,usedL);
+      plan[d+"_lunch"]={type:"recipe", recipeId:r.id, diners:dinersFromOut(c.comida), office:offOk}; }
+    if(c.cena==="ambos"){ plan[d+"_dinner"]={type:"eatout"}; }
+    else { const r = pull(dinnerAll,Dref,usedD);
+      plan[d+"_dinner"]={type:"recipe", recipeId:r.id, diners:dinersFromOut(c.cena)}; }
+  }
+  ensureFish(plan, rng);
+  ensurePuree(plan, rng);
+  return plan;
+}
+
+function ensureFish(plan, rng){
+  // Objetivo: 2 días de pescado a la semana (mínimo 1). Si hay más, se reduce; si hay menos, se añade.
+  const TARGET = 2;
+  const fishLunch = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"&&r.fish), rng);
+  const fishLunchTup = fishLunch.filter(r=>r.tupper);
+  const fishDinner = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&r.fish), rng);
+  const noFishLunch = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"&&!r.fish), rng);
+  const noFishLunchTup = noFishLunch.filter(r=>r.tupper);
+  const noFishDinner = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&!r.fish), rng);
+  const fishCells = () => recipeCells(plan).filter(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&r.fish; });
+
+  // Añadir pescado si faltan
+  let guard=0;
+  while(fishCells().length<TARGET && guard++<12){
+    const cells = recipeCells(plan).filter(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&!r.fish; })
+      .sort((a,b)=> (a.endsWith("dinner")?0:1)-(b.endsWith("dinner")?0:1));
+    let done=false;
+    for(const k of cells){
+      const isLunch = k.endsWith("lunch");
+      const pool = isLunch ? (plan[k].office?fishLunchTup:fishLunch) : fishDinner;
+      const have = new Set(recipeCells(plan).map(c=>plan[c].recipeId));
+      const cand = pool.find(r=>!have.has(r.id)) || pool[0];
+      if(cand){ plan[k]={...plan[k], recipeId:cand.id}; done=true; break; }
+    }
+    if(!done) break;
+  }
+  // Quitar pescado de más (dejar TARGET)
+  guard=0;
+  while(fishCells().length>TARGET && guard++<12){
+    const k = fishCells()[fishCells().length-1];
+    const isLunch = k.endsWith("lunch");
+    const pool = isLunch ? (plan[k].office?noFishLunchTup:noFishLunch) : noFishDinner;
+    const have = new Set(recipeCells(plan).map(c=>plan[c].recipeId));
+    const cand = pool.find(r=>!have.has(r.id)) || pool[0];
+    if(cand){ plan[k]={...plan[k], recipeId:cand.id}; } else break;
+  }
+}
+function ensurePuree(plan, rng){
+  const dinners = recipeCells(plan).filter(k=>k.endsWith("dinner"));
+  if(dinners.some(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&r.isPuree; })) return;
+  const purees = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&r.isPuree), rng);
+  if(!purees.length) return;
+  const target = dinners.find(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&!r.fish; }) || dinners[0];
+  if(target){ const have=new Set(recipeCells(plan).map(c=>plan[c].recipeId)); const cand=purees.find(r=>!have.has(r.id))||purees[0]; plan[target]={...plan[target], recipeId:cand.id}; }
+}
+
+// ============================================================================
+//  CONFIGURACIÓN DE LA BASE DE DATOS (Supabase)
+//  Pega aquí los dos datos de tu proyecto de Supabase. La segunda clave
+//  (la "publishable" o "anon") es PÚBLICA por diseño: no pasa nada porque se
+//  vea, la seguridad la dan las reglas de la base de datos. NUNCA pegues aquí
+//  la "secret" / "service_role".
+//  Si los dejas vacíos, la app funciona igual pero guardando solo en este
+//  navegador (modo de prueba, sin nube y sin login).
+// ============================================================================
+const SUPABASE_URL = "https://kxkqcredozuqrspucaav.supabase.co";       // p.ej. "https://abcd1234.supabase.co"
+const SUPABASE_ANON_KEY = "sb_publishable__Afy74Uqoje1gSROvbe_aQ_CO4flmzV";  // p.ej. "sb_publishable_xxxxxxxx..."
+
+const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+// La app es PÚBLICA: no hay login. Todos los datos se guardan en la nube bajo
+// este identificador fijo y compartido (tú y Rubén veis lo mismo desde
+// cualquier dispositivo, sin iniciar sesión).
+// Si antes usabas login y quieres CONSERVAR tus datos anteriores, pega aquí el
+// ID de tu antiguo usuario (Supabase → Authentication → Users → "User UID").
+const PUBLIC_USER_ID = "00000000-0000-0000-0000-000000000000";
+
+// Estas son las tres "cajas" de datos que guarda la app.
+const DATA_KEYS = ["menu_weeks_v4", "menu_log_v4", "menu_expenses_v4"];
+
+// Copia en memoria de los datos. La app lee de aquí (rápido) y cada cambio
+// se escribe en la nube en segundo plano.
+const cache = {};
+let currentUserId = null;
+
+// Carga TODOS los datos una vez (al entrar). Si no hay Supabase configurado,
+// carga desde el navegador.
+async function loadAll(userId){
+  currentUserId = userId;
+  DATA_KEYS.forEach(k => { cache[k] = undefined; });
+  if (!sb){
+    DATA_KEYS.forEach(k => { try { const v=localStorage.getItem(k); cache[k]=v?JSON.parse(v):undefined; } catch(e){} });
+    return;
+  }
+  try {
+    // App pública: leemos todos los datos guardados (sin filtrar por usuario) y
+    // nos quedamos con la versión MÁS RECIENTE de cada caja. Así se recuperan
+    // automáticamente los datos guardados antes, cuando todavía había login,
+    // y la app no aparece vacía.
+    const { data, error } = await sb.from("kv").select("key,data,updated_at")
+      .order("updated_at", { ascending: true, nullsFirst: true });
+    if (!error && data){ data.forEach(row => { cache[row.key] = row.data; }); }
+  } catch(e){ console.error("No se pudieron cargar los datos", e); }
+}
+
+// Guardado en la nube con un pequeño retardo, para no saturar con cada tecla.
+const _timers = {};
+function pushToCloud(k){
+  if (!sb || !currentUserId) return;
+  clearTimeout(_timers[k]);
+  _timers[k] = setTimeout(async () => {
+    try {
+      await sb.from("kv").upsert({ user_id: currentUserId, key: k, data: cache[k], updated_at: new Date().toISOString() });
+    } catch(e){ console.error("No se pudo guardar en la nube:", k, e); }
+  }, 600);
+}
+
+const store = {
+  get(k, fb){ const v = cache[k]; return (v===undefined || v===null) ? fb : v; },
+  set(k, v){
+    cache[k] = v;
+    if (sb) pushToCloud(k);
+    else { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  }
+};
+function makeWeek(start, salt, config){
+  const key = dateKey(start);
+  const cfg = config || defaultConfig();
+  return { key, start:start.toISOString(), salt:salt||0, config:cfg, plan:generatePlan(key+":"+(salt||0), start, cfg), shopping:{checked:{},have:{},removed:{},extra:[],notes:""} };
+}
+
+// ================= Componentes =================
+function MealCard({ entry, slotKey, slotLabel, dateISO, date, complied, onOpen, onToggleOffice, onCycleDiners, onToggleComplied }) {
+  if (!entry) {
+    return (
+      <div className="meal-card is-empty">
+        <div className="card-head" role="button" tabIndex={0} onClick={onOpen} onKeyDown={e=>{if(e.key==="Enter"){onOpen();}}}>
+          <span className="slot-label">{slotLabel}</span>
+        </div>
+        <span className="meal-name" onClick={onOpen}>+ Añadir</span>
+      </div>
+    );
+  }
+  if (entry.type === "eatout") {
+    return (
+      <div className="meal-card is-eatout" role="button" tabIndex={0} onClick={onOpen} onKeyDown={e=>{if(e.key==="Enter"){onOpen();}}}>
+        <div className="card-head"><span className="slot-label">{slotLabel}</span></div>
+        <span className="meal-name">🍽️ Comemos fuera</span>
+      </div>
+    );
+  }
+  const isOffice = !!entry.office;
+  const diners = entry.diners || "both";
+  const r = entry.type==="recipe" ? getRecipeById(entry.recipeId) : null;
+  const name = entry.type==="custom" ? (entry.name||"Comida personalizada") : (r ? r.name : "");
+  const canOffice = slotKey==="lunch" && officeAllowed(date);
+  const dinersLabel = diners==="me" ? "Solo yo" : diners==="ruben" ? "Solo Rubén" : "";
+  return (
+    <div className={"meal-card" + (isOffice?" office":"") + (entry.type==="custom"?" is-custom":"")}>
+      <div className="card-head" role="button" tabIndex={0} onClick={onOpen} onKeyDown={e=>{if(e.key==="Enter"){onOpen();}}}>
+        <span className="slot-label">{slotLabel}{entry.type==="custom"?" · Manual":""}</span>
+        {canOffice && <button className={"office-toggle"+(isOffice?" on":"")} title="Día de oficina (tupper)" onClick={e=>{e.stopPropagation(); onToggleOffice();}}>🏢</button>}
+      </div>
+      <span className="meal-name" onClick={onOpen}>{name}</span>
+      <div className="meal-meta">
+        {r && <span>{r.kcal} kcal</span>}
+        {r && r.fiberRich && <span className="tag tag-fiber">Fibra</span>}
+        {r && r.fish && <span className="tag tag-fish">Pescado</span>}
+        {isOffice && <span className="tag tag-tupper">🍱 Tupper</span>}
+        {dinersLabel && <span className="tag tag-indiv">{dinersLabel}</span>}
+      </div>
+      <div className="card-actions">
+        <button className={"mini-btn"+(diners!=="both"?" diners-on":"")} title="Marcar si come/cena fuera solo una persona" onClick={onCycleDiners}>
+          {diners==="both" ? "👥 Ambos" : diners==="me" ? "🙋 Yo" : "🧔 Rubén"}
+        </button>
+        <button className={"mini-btn"+(complied?" done":"")} title="Marcar si cumplí el menú" onClick={onToggleComplied}>
+          {complied ? "✓ Hecho" : "Cumplí"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function IngredientRow({ ing, persons }) {
+  if (ing.staple) return <li>{ing.d}</li>;
+  if (WEIGH(ing.u)) {
+    return (
+      <li>
+        <div className="ing-name">{ing.n}</div>
+        <div className="pp">
+          {persons.includes("me") && (() => { const raw=personRaw(ing,"me"); return (
+            <span className="me">Yo: {raw}{ing.u}{ing.ck?<span className="ck"> (≈{Math.round(raw*ing.ck)}{ing.u} cocido)</span>:null}</span>
+          ); })()}
+          {persons.includes("ruben") && (ing.dis==="ruben"
+            ? <span className="ruben">Rubén: — (no toma)</span>
+            : (() => { const raw=personRaw(ing,"ruben"); return (
+              <span className="ruben">Rubén: {raw}{ing.u}{ing.ck?<span className="ck"> (≈{Math.round(raw*ing.ck)}{ing.u} cocido)</span>:null}</span>
+            ); })())}
+        </div>
+      </li>
+    );
+  }
+  return <li><span className="ing-name">{ing.d}</span>{ing.dis==="ruben" && persons.includes("ruben") ? <span className="pp"><span className="ruben">Rubén no lo toma</span></span> : null}</li>;
+}
+
+function RecipeDetail({ recipe, ingredients, edited, diners, onEdit, onEditIngredients, onEatOut, onClear }) {
+  const persons = diners==="me"?["me"]:diners==="ruben"?["ruben"]:["me","ruben"];
+  const ings = ingredients || recipe.ingredients;
+  return (
+    <React.Fragment>
+      <div className="sheet-header">
+        <span className="slot-label">Receta</span>
+        <h2>{recipe.name}</h2>
+        <div className="badge-row">
+          <span className="badge meal">{recipe.slot==="lunch"?"🍽️ Comida":"🌙 Cena"}</span>
+          {recipe.fiberRich && <span className="badge fiber">Rica en fibra</span>}
+          {recipe.tupper && <span className="badge tupper">🍱 Apto tupper</span>}
+          {edited && <span className="badge" style={{background:"var(--gold)",color:"#fff"}}>✏️ Editada</span>}
+        </div>
+      </div>
+      <div className="macro-row">
+        <div className="macro-pill"><span className="v">{recipe.kcal}</span><span className="l">kcal aprox.</span></div>
+        <div className="macro-pill"><span className="v">{recipe.protein}g</span><span className="l">proteína</span></div>
+        <div className="macro-pill"><span className="v">{recipe.time}'</span><span className="l">tiempo</span></div>
+      </div>
+      {recipe.rubenNote && (<div className="sheet-section"><div className="note-box ruben"><strong>Rubén (sin tomate):</strong> {recipe.rubenNote}</div></div>)}
+      <div className="sheet-section">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+          <h3 style={{margin:0}}>Ingredientes {diners==="both"?"(por persona)":(diners==="me"?"(solo tú)":"(solo Rubén)")}</h3>
+          <button className="regen-btn" onClick={onEditIngredients}>✏️ Editar</button>
+        </div>
+        <ul className="ing-list">{ings.map((ing,i)=><IngredientRow key={i} ing={ing} persons={persons} />)}</ul>
+        <div className="note-box tip" style={{marginTop:10}}>Pesa en crudo lo que vas a cocinar y en cocido lo que sirves. Las cantidades con "cocido" están estimadas.</div>
+      </div>
+      <div className="sheet-section">
+        <h3>Preparación</h3>
+        <ul className="step-list">{recipe.steps.map((s,i)=>(<li key={i}><span className="step-num">{i+1}</span><span>{s}</span></li>))}</ul>
+        {edited && <div className="note-box tip" style={{marginTop:12}}>Has editado los ingredientes: ajusta los pasos a tus cambios.</div>}
+      </div>
+      <div className="action-row">
+        <button className="action-btn" onClick={onEdit}>✏️ Cambiar plato</button>
+        <button className="action-btn" onClick={onEatOut}>🍽️ Comer fuera</button>
+      </div>
+      <div className="action-row" style={{paddingTop:10}}>
+        <button className="action-btn danger" onClick={onClear}>🗑️ Vaciar</button>
+      </div>
+    </React.Fragment>
+  );
+}
+
+function IngredientEditor({ initial, onSave, onCancel }) {
+  const TYPES=[["P","Proteína"],["C","Hidrato"],["V","Verdura"],["Ft","Grasa"],["O","Otro"],["staple","Condimento"]];
+  const UNITS=["g","ml","ud","lata","bote","diente","rebanada","loncha","bolsa"];
+  const STORES=[["fruteria","Frutería"],["mercado","Mercado"],["mercadona","Mercadona"]];
+  const rid=()=>Math.random().toString(36).slice(2,8);
+  const toRow=(ing)=> ing.staple
+    ? { id:rid(), type:"staple", name:ing.d, qty:"", unit:"ud", store:"mercadona" }
+    : { id:rid(), type:ing.r||"O", name:ing.n, qty:ing.q, unit:ing.u, store:ing.s||"mercadona", ck:ing.ck };
+  const [rows,setRows]=useState(()=> (initial||[]).map(toRow));
+  function patch(id, p){ setRows(rs=>rs.map(r=>r.id===id?{...r,...p}:r)); }
+  function add(){ setRows(rs=>rs.concat([{id:rid(),type:"O",name:"",qty:"",unit:"g",store:"mercadona"}])); }
+  function remove(id){ setRows(rs=>rs.filter(r=>r.id!==id)); }
+  function build(){
+    return rows.filter(r=>r.name.trim()).map(r=>{
+      if(r.type==="staple") return { staple:true, d:r.name.trim(), items:[r.name.trim()] };
+      const q = parseFloat(String(r.qty).replace(",","."))||0;
+      const ul = UNIT_LABEL[r.unit]||r.unit;
+      const d = r.unit==="ud" ? `${q} ${r.name.trim()}` : `${q} ${ul} de ${r.name.trim()}`;
+      return { d, n:r.name.trim(), q, u:r.unit, r:r.type, s:r.store, ck:r.ck };
+    });
+  }
+  return (
+    <div className="sheet-section" style={{paddingBottom:8}}>
+      <h3>Editar ingredientes</h3>
+      <div className="note-box tip" style={{marginBottom:12}}>Quita o añade ingredientes. Los cambios se reflejan en esta receta y en la lista de la compra.</div>
+      {rows.map(r=>(
+        <div className="ed-row" key={r.id}>
+          <div className="ed-line">
+            <input className="ed-name" type="text" placeholder="Ingrediente" value={r.name} onChange={e=>patch(r.id,{name:e.target.value})} />
+            <button className="ed-del" onClick={()=>remove(r.id)} aria-label="Quitar">✕</button>
+          </div>
+          <div className="ed-line">
+            <select className="ed-sel" value={r.type} onChange={e=>patch(r.id,{type:e.target.value})}>
+              {TYPES.map(([v,l])=><option key={v} value={v}>{l}</option>)}
+            </select>
+            {r.type!=="staple" && <input className="ed-qty" type="number" inputMode="decimal" placeholder="Cant." value={r.qty} onChange={e=>patch(r.id,{qty:e.target.value})} />}
+            {r.type!=="staple" && <select className="ed-sel" value={r.unit} onChange={e=>patch(r.id,{unit:e.target.value})}>{UNITS.map(u=><option key={u} value={u}>{UNIT_LABEL[u]||u}</option>)}</select>}
+          </div>
+          {r.type!=="staple" && (
+            <div className="ed-line">
+              <select className="ed-sel wide" value={r.store} onChange={e=>patch(r.id,{store:e.target.value})}>{STORES.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select>
+            </div>
+          )}
+        </div>
+      ))}
+      <button className="ed-add" onClick={add}>＋ Añadir ingrediente</button>
+      <div className="action-row" style={{padding:0,marginTop:14}}>
+        <button className="action-btn" onClick={onCancel}>Cancelar</button>
+        <button className="action-btn primary" onClick={()=>onSave(build())}>Guardar</button>
+      </div>
+    </div>
+  );
+}
+
+function CustomDetail({ entry, onEdit, onEatOut, onClear }) {
+  return (
+    <React.Fragment>
+      <div className="sheet-header"><span className="slot-label">Manual</span><h2>{entry.name||"Comida personalizada"}</h2></div>
+      {entry.notes && (<div className="sheet-section"><h3>Notas</h3><p style={{fontSize:14.5,lineHeight:1.6}}>{entry.notes}</p></div>)}
+      <div className="action-row">
+        <button className="action-btn" onClick={onEdit}>✏️ Editar</button>
+        <button className="action-btn" onClick={onEatOut}>🍽️ Comer fuera</button>
+      </div>
+      <div className="action-row" style={{paddingTop:10}}><button className="action-btn danger" onClick={onClear}>🗑️ Vaciar</button></div>
+    </React.Fragment>
+  );
+}
+
+function EatOutDetail({ onPickRecipe, onEdit, onClear }) {
+  return (
+    <React.Fragment>
+      <div className="sheet-header"><span className="slot-label">Plan</span><h2>🍽️ Comemos fuera</h2></div>
+      <div className="empty-illustration">No se incluirá en la lista de la compra.</div>
+      <div className="action-row">
+        <button className="action-btn primary" onClick={onPickRecipe}>🍳 Elegir receta</button>
+        <button className="action-btn" onClick={onEdit}>✏️ Manual</button>
+      </div>
+      <div className="action-row" style={{paddingTop:10}}><button className="action-btn danger" onClick={onClear}>🗑️ Vaciar</button></div>
+    </React.Fragment>
+  );
+}
+
+function EditForm({ initial, onSave, onCancel }) {
+  const [name, setName] = useState(initial.name || "");
+  const [notes, setNotes] = useState(initial.notes || "");
+  return (
+    <div className="sheet-section" style={{paddingBottom:8}}>
+      <div className="field-group"><label>Nombre del plato</label>
+        <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="Ej. Pollo con arroz" autoFocus /></div>
+      <div className="field-group"><label>Notas</label>
+        <textarea rows={5} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Ingredientes, pasos…" /></div>
+      <div className="action-row" style={{padding:0,marginTop:6}}>
+        <button className="action-btn" onClick={onCancel}>Cancelar</button>
+        <button className="action-btn primary" onClick={()=>onSave({type:"custom",name:name.trim()||"Comida personalizada",notes:notes.trim()})}>Guardar</button>
+      </div>
+    </div>
+  );
+}
+
+function RecipePicker({ slotKey, onPick, onEatOut }) {
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState(slotKey);
+  const list = useMemo(()=>{
+    let rs = RECIPE_BANK;
+    if(filter!=="all") rs = rs.filter(r=>r.slot===filter);
+    if(query.trim()){ const q=query.toLowerCase(); rs=rs.filter(r=>r.name.toLowerCase().includes(q)); }
+    return rs;
+  }, [query, filter]);
+  return (
+    <div className="sheet-section" style={{paddingBottom:4}}>
+      <input className="search-input" type="text" placeholder="Buscar receta…" value={query} onChange={e=>setQuery(e.target.value)} />
+      <div className="pick-filter">
+        <button className={filter==="lunch"?"active":""} onClick={()=>setFilter("lunch")}>Comidas</button>
+        <button className={filter==="dinner"?"active":""} onClick={()=>setFilter("dinner")}>Cenas</button>
+        <button className={filter==="all"?"active":""} onClick={()=>setFilter("all")}>Todas</button>
+      </div>
+      <div className="recipe-pick-list">
+        {list.map(r=>(
+          <button key={r.id} className="recipe-pick-item" onClick={()=>onPick(r.id)}>
+            <div>
+              <div className="name">{r.name}{r.fiberRich&&<span className="mini-tag fiber">Fibra</span>}{r.fish&&<span className="mini-tag fish">Pescado</span>}</div>
+              <div className="meta"><span className={"mini-tag "+(r.slot==="lunch"?"comida":"cena")}>{r.slot==="lunch"?"Comida":"Cena"}</span> &nbsp;{r.time}' · {r.kcal} kcal · {r.protein}g</div>
+            </div>
+            <span className="chevron">›</span>
+          </button>
+        ))}
+        {list.length===0 && <div className="empty-illustration">No hay recetas que coincidan.</div>}
+      </div>
+      <button className="eatout-btn" onClick={onEatOut}>🍽️ Marcar "comemos fuera"</button>
+    </div>
+  );
+}
+
+function MealSheet({ context, onClose, onUpdate, onPatch }) {
+  const entry = context.entry;
+  const [mode, setMode] = useState(entry ? "view" : "pick");
+  const diners = (entry && entry.diners) || "both";
+  const save = (ne)=>{ onUpdate(context.weekKey, context.cell, ne); onClose(); };
+  const clear = ()=>{ onUpdate(context.weekKey, context.cell, null); onClose(); };
+  let body;
+  if (mode==="pick") {
+    body = <RecipePicker slotKey={context.slotKey}
+      onPick={id=>save({type:"recipe",recipeId:id,diners,office:entry&&entry.office})}
+      onEatOut={()=>save({type:"eatout"})} />;
+  } else if (mode==="edit") {
+    body = <EditForm initial={entry&&entry.type==="custom"?entry:{}} onSave={ne=>save({...ne,diners,office:entry&&entry.office})} onCancel={()=>setMode(entry?"view":"pick")} />;
+  } else if (mode==="editIng" && entry && entry.type==="recipe") {
+    const r = getRecipeById(entry.recipeId);
+    const current = (entry.ingredients && entry.ingredients.length) ? entry.ingredients : (r?r.ingredients:[]);
+    body = <IngredientEditor initial={current} onSave={(ings)=>{ onPatch({ingredients:ings}); setMode("view"); }} onCancel={()=>setMode("view")} />;
+  } else if (entry && entry.type==="recipe") {
+    const r = getRecipeById(entry.recipeId);
+    const ings = (entry.ingredients && entry.ingredients.length) ? entry.ingredients : (r?r.ingredients:null);
+    body = r ? (
+      <React.Fragment>
+        <div className="seg">
+          <button className={diners==="both"?"active":""} onClick={()=>onPatch({diners:"both"})}>👥 Ambos</button>
+          <button className={diners==="me"?"active":""} onClick={()=>onPatch({diners:"me"})}>🙋 Solo yo</button>
+          <button className={diners==="ruben"?"active":""} onClick={()=>onPatch({diners:"ruben"})}>🧔 Solo Rubén</button>
+        </div>
+        <RecipeDetail recipe={r} ingredients={ings} edited={!!(entry.ingredients&&entry.ingredients.length)} diners={diners}
+          onEdit={()=>setMode("edit")} onEditIngredients={()=>setMode("editIng")} onEatOut={()=>save({type:"eatout"})} onClear={clear} />
+      </React.Fragment>
+    ) : <RecipePicker slotKey={context.slotKey} onPick={id=>save({type:"recipe",recipeId:id})} onEatOut={()=>save({type:"eatout"})} />;
+  } else if (entry && entry.type==="custom") {
+    body = <CustomDetail entry={entry} onEdit={()=>setMode("edit")} onEatOut={()=>save({type:"eatout"})} onClear={clear} />;
+  } else if (entry && entry.type==="eatout") {
+    body = <EatOutDetail onPickRecipe={()=>setMode("pick")} onEdit={()=>setMode("edit")} onClear={clear} />;
+  } else {
+    body = <RecipePicker slotKey={context.slotKey} onPick={id=>save({type:"recipe",recipeId:id})} onEatOut={()=>save({type:"eatout"})} />;
+  }
+  return (
+    <div className="overlay">
+      <div className="overlay-backdrop" onClick={onClose}></div>
+      <div className="sheet" role="dialog" aria-modal="true">
+        <div className="sheet-handle"></div>
+        <button className="close-btn" onClick={onClose} aria-label="Cerrar">✕</button>
+        {mode==="pick" && (<div className="sheet-header" style={{borderBottom:"none",paddingBottom:0}}>
+          <span className="slot-label">{context.dayName} · {context.slotLabel}</span><h2>Elegir {context.slotLabel.toLowerCase()}</h2></div>)}
+        {body}
+      </div>
+    </div>
+  );
+}
+
+function buildShopping(plan){
+  const agg={}, customs=[];
+  Object.values(plan).forEach(entry=>{
+    if(!entry) return;
+    if(entry.type==="recipe"){
+      const r=getRecipeById(entry.recipeId); if(!r) return;
+      const persons = personsOf(entry);
+      const ings = (entry.ingredients && entry.ingredients.length) ? entry.ingredients : r.ingredients;
+      ings.forEach(ing=>{
+        if(ing.staple){ (ing.items||[]).forEach(n=>{ const k="s__"+n; if(!agg[k]) agg[k]={key:k,name:n,staple:true,store:"mercadona"}; }); return; }
+        const q = shopQty(ing, persons); if(q<=0) return;
+        const k = ing.n+"__"+ing.u;
+        if(!agg[k]) agg[k]={key:k,name:ing.n,unit:ing.u,qty:0,store:ing.s};
+        agg[k].qty += q;
+      });
+    } else if(entry.type==="custom"){ customs.push(entry.name||"Comida personalizada"); }
+  });
+  return { items:Object.values(agg), customs };
+}
+
+function ShoppingSheet({ weeks, initialWeekKey, onClose, onUpdateShopping }) {
+  const [activeKey, setActiveKey] = useState(initialWeekKey);
+  const [newItem, setNewItem] = useState("");
+  const [editId, setEditId] = useState(null);
+  const [editTxt, setEditTxt] = useState("");
+  const week = weeks.find(w=>w.key===activeKey) || weeks[0];
+  const allBuilt = useMemo(()=>buildShopping(week.plan), [week]);
+  const removed = week.shopping.removed||{};
+  const items = allBuilt.items.filter(it=>!removed[it.key]);
+  const customs = allBuilt.customs;
+  const checked = week.shopping.checked||{}, have = week.shopping.have||{}, extra = week.shopping.extra||[];
+  const notes = week.shopping.notes||"";
+  const grouped = useMemo(()=>{ const g={}; items.forEach(it=>{ (g[it.store]=g[it.store]||[]).push(it); }); Object.values(g).forEach(a=>a.sort((x,y)=>x.name.localeCompare(y.name))); return g; }, [items]);
+  const neededAuto = items.filter(it=>!have[it.key]);
+  const total = neededAuto.length + extra.length;
+  const done = neededAuto.filter(it=>checked[it.key]).length + extra.filter(e=>e.checked).length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  const upd = (s)=>onUpdateShopping(week.key, s);
+  const cleared = !!week.shopping.cleared;
+  return (
+    <div className="overlay">
+      <div className="overlay-backdrop" onClick={onClose}></div>
+      <div className="sheet" role="dialog" aria-modal="true">
+        <div className="sheet-handle"></div>
+        <button className="close-btn" onClick={onClose} aria-label="Cerrar">✕</button>
+        <div className="sheet-header"><span className="slot-label">Tu menú</span><h2>🛒 Lista de la compra</h2></div>
+        {weeks.length>1 && (<div className="week-tabs">{weeks.map((w,i)=>(<button key={w.key} className={w.key===activeKey?"active":""} onClick={()=>setActiveKey(w.key)}>{i===0?"Esta semana":"Próxima semana"}</button>))}</div>)}
+        {cleared ? (
+          <div className="empty-illustration" style={{padding:"44px 26px"}}>
+            <div style={{fontSize:40,marginBottom:8}}>✅</div>
+            <div style={{fontSize:17,fontWeight:700,color:"var(--ink)"}}>Compra hecha</div>
+            <p style={{marginTop:8}}>La lista se ha vaciado. Se generará una nueva al crear el menú de la próxima semana.</p>
+            <button className="action-btn" style={{maxWidth:200,margin:"14px auto 0"}} onClick={()=>upd({...week.shopping,cleared:false})}>Reabrir lista</button>
+          </div>
+        ) : (
+        <React.Fragment>
+        <div className="shop-progress"><div className="bar"><div className="fill" style={{width:pct+"%"}}></div></div><div className="label">{done} de {total} comprado</div></div>
+        {done>0 && (<div style={{padding:"12px 22px 0"}}><button className="create-btn" style={{margin:0}} onClick={()=>upd({...week.shopping,cleared:true})}>✅ Compra hecha (vaciar lista)</button></div>)}
+        <div className="shop-legend">Toca el texto para marcar lo comprado. Pulsa 🏠 si ya lo tienes en casa (no contará).</div>
+        {STORE_ORDER.filter(s=>grouped[s]).map(s=>{
+          const info=STORE_INFO[s];
+          return (
+            <div className="shop-store" key={s}>
+              <h4><span className="store-dot" style={{background:info.color}}></span>{info.label}</h4>
+              <p className="sub">{info.sub}</p>
+              {grouped[s].map(it=>{
+                const isHave=!!have[it.key]; const isDone=!isHave&&!!checked[it.key];
+                return (
+                  <div key={it.key} className={"shop-item"+(isHave?" have":(isDone?" done":""))}>
+                    <span className="check" role="button" tabIndex={0} onClick={()=>!isHave&&upd({...week.shopping,checked:{...checked,[it.key]:!checked[it.key]}})}>{isDone?"✓":""}</span>
+                    <span className="txt" onClick={()=>!isHave&&upd({...week.shopping,checked:{...checked,[it.key]:!checked[it.key]}})}>
+                      {!it.staple && <span className="qty">{it.qty} {UNIT_LABEL[it.unit]||it.unit} · </span>}
+                      {it.staple ? it.name+" (al gusto)" : it.name}
+                    </span>
+                    <button className={"have-btn"+(isHave?" on":"")} title="Ya lo tengo en casa" onClick={()=>upd({...week.shopping,have:{...have,[it.key]:!have[it.key]}})}>🏠 {isHave?"En casa":"Tengo"}</button>
+                    <button className="icon-btn" title="Quitar de la lista" onClick={()=>upd({...week.shopping,removed:{...removed,[it.key]:true}})}>✕</button>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+        <div className="shop-store">
+          <h4>📝 Añadidos por mí</h4><p className="sub">Lo que añadas o edites a mano</p>
+          {extra.length===0 && <div style={{fontSize:13,color:"var(--ink-soft)",marginBottom:8}}>Añade lo que quieras abajo.</div>}
+          {extra.map(e=>(
+            <div key={e.id} className={"shop-item"+(e.checked?" done":"")}>
+              <span className="check" role="button" tabIndex={0} onClick={()=>upd({...week.shopping,extra:extra.map(x=>x.id===e.id?{...x,checked:!x.checked}:x)})}>{e.checked?"✓":""}</span>
+              {editId===e.id ? (
+                <input className="item-edit" autoFocus value={editTxt} onChange={ev=>setEditTxt(ev.target.value)}
+                  onKeyDown={ev=>{ if(ev.key==="Enter"){ upd({...week.shopping,extra:extra.map(x=>x.id===e.id?{...x,text:editTxt.trim()||x.text}:x)}); setEditId(null); } }}
+                  onBlur={()=>{ upd({...week.shopping,extra:extra.map(x=>x.id===e.id?{...x,text:editTxt.trim()||x.text}:x)}); setEditId(null); }} />
+              ) : (
+                <span className="txt" onClick={()=>upd({...week.shopping,extra:extra.map(x=>x.id===e.id?{...x,checked:!x.checked}:x)})}>{e.text}</span>
+              )}
+              <button className="icon-btn" title="Editar" onClick={()=>{ setEditId(e.id); setEditTxt(e.text); }}>✏️</button>
+              <button className="del" onClick={()=>upd({...week.shopping,extra:extra.filter(x=>x.id!==e.id)})} aria-label="Eliminar">✕</button>
+            </div>
+          ))}
+        </div>
+        <div className="add-row">
+          <input className="add-item-input" type="text" placeholder="Añadir producto…" value={newItem} onChange={e=>setNewItem(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter"&&newItem.trim()){ upd({...week.shopping,extra:extra.concat([{id:Date.now()+"",text:newItem.trim(),checked:false}])}); setNewItem(""); } }} />
+          <button onClick={()=>{ if(newItem.trim()){ upd({...week.shopping,extra:extra.concat([{id:Date.now()+"",text:newItem.trim(),checked:false}])}); setNewItem(""); } }}>Añadir</button>
+        </div>
+        {customs.length>0 && (<div className="custom-note"><strong>Nota:</strong> {customs.length} comida(s) personalizada(s) ({customs.join(", ")}). Añade sus ingredientes a mano si hace falta.</div>)}
+        <div className="shop-store" style={{paddingBottom:10}}>
+          <h4>🗒️ Notas</h4><p className="sub">Apunta lo que quieras (marca, oferta, recordatorio…)</p>
+          <textarea className="notes-area" placeholder="Escribe tus notas aquí…" value={notes} onChange={e=>upd({...week.shopping,notes:e.target.value})} />
+        </div>
+        </React.Fragment>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function WeekSetupPopup({ title, eyebrow, confirmLabel, computeStart, initialDow, initialConfig, onConfirm, onCancel }) {
+  const [dow, setDow] = useState(initialDow);
+  const [cfg, setCfg] = useState(initialConfig || defaultConfig());
+  const opts = [["none","Nadie"],["yo","Yo"],["ruben","Rubén"],["ambos","Ambos"]];
+  const DOWS = [["Lun",1],["Mar",2],["Mié",3],["Jue",4],["Vie",5],["Sáb",6],["Dom",0]];
+  const weekStart = computeStart(dow);
+  function setDay(d, patch){ setCfg(c=>c.map((x,i)=> i===d ? {...x,...patch} : x)); }
+  return (
+    <div className="overlay">
+      <div className="overlay-backdrop" onClick={onCancel}></div>
+      <div className="sheet" role="dialog" aria-modal="true">
+        <div className="sheet-handle"></div>
+        <button className="close-btn" onClick={onCancel} aria-label="Cerrar">✕</button>
+        <div className="sheet-header"><span className="slot-label">{eyebrow}</span><h2>{title}</h2>
+          <p style={{fontSize:13,color:"var(--ink-soft)",margin:"8px 0 0",lineHeight:1.5}}>Elige el día en que empieza la semana (el día que vas a la compra) y marca los días de oficina o de comer/cenar fuera.</p>
+        </div>
+        <div className="dow-pick">
+          {DOWS.map(([l,v])=>(<button key={v} className={dow===v?"active":""} onClick={()=>setDow(v)}>{l}</button>))}
+        </div>
+        <p className="start-info">Empieza el {dayLabel(weekStart)} {fmtDate(weekStart)}</p>
+        {Array.from({length:7}).map((_,d)=>{
+          const date = addDays(weekStart, d);
+          const offOk = officeAllowed(date);
+          const c = cfg[d];
+          return (
+            <div className="pop-day" key={d}>
+              <div className="pd-head">
+                <div><span className="pd-name" style={{textTransform:"capitalize"}}>{dayLabel(date)}</span> <span className="pd-date">{fmtDate(date)}</span></div>
+                {offOk ? (
+                  <button className={"office-chk"+(c.office?" on":"")} onClick={()=>setDay(d,{office:!c.office})}>🏢 Oficina</button>
+                ) : (
+                  <span className="office-chk disabled" title="Jornada intensiva: comes en casa">🏠 En casa</span>
+                )}
+              </div>
+              <div className="pop-line">
+                <span className="pl-label">Comida fuera</span>
+                <div className="pop-opts">{opts.map(([v,l])=>(<button key={v} className={c.comida===v?"active":""} onClick={()=>setDay(d,{comida:v})}>{l}</button>))}</div>
+              </div>
+              <div className="pop-line">
+                <span className="pl-label">Cena fuera</span>
+                <div className="pop-opts">{opts.map(([v,l])=>(<button key={v} className={c.cena===v?"active":""} onClick={()=>setDay(d,{cena:v})}>{l}</button>))}</div>
+              </div>
+            </div>
+          );
+        })}
+        <div className="action-row">
+          <button className="action-btn" onClick={onCancel}>Cancelar</button>
+          <button className="action-btn primary" onClick={()=>onConfirm(weekStart, cfg)}>{confirmLabel}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Dashboard({ log, weeks }) {
+  const entries = Object.entries(log).filter(([,v])=>v).map(([k])=>{ const i=k.lastIndexOf("_"); return { date:k.slice(0,i), slot:k.slice(i+1) }; });
+  const total = entries.length;
+  const lunch = entries.filter(e=>e.slot==="lunch").length;
+  const dinner = entries.filter(e=>e.slot==="dinner").length;
+  const now = new Date();
+  const monthCount = entries.filter(e=>{ const d=new Date(e.date); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); }).length;
+  const wkStart = startOfWeek(now), wkEnd = addDays(wkStart,7);
+  const weekEntries = entries.filter(e=>{ const d=new Date(e.date); return d>=wkStart && d<wkEnd; });
+  // planificado esta semana (no eatout) en la semana actual guardada
+  const curWeek = weeks.find(w=>w.key===dateKey(wkStart));
+  let plannedWeek = 0;
+  if (curWeek) Object.values(curWeek.plan).forEach(e=>{ if(e && (e.type==="recipe"||e.type==="custom")) plannedWeek++; });
+  const rateWeek = plannedWeek ? Math.round(weekEntries.length/plannedWeek*100) : 0;
+  // por día de la semana
+  const dow = [0,0,0,0,0,0,0];
+  entries.forEach(e=>{ const d=new Date(e.date); const idx=(d.getDay()===0)?6:d.getDay()-1; dow[idx]++; });
+  const maxDow = Math.max(1, ...dow);
+  const lunchPct = total ? Math.round(lunch/total*100) : 0;
+  const dinnerPct = total ? Math.round(dinner/total*100) : 0;
+
+  if (total===0) {
+    return <div className="dash-empty">Aún no has marcado ninguna comida como cumplida.<br/>Marca "Cumplí" en las comidas del calendario y aquí verás tus estadísticas.</div>;
+  }
+  return (
+    <div>
+      <div className="dash-cards">
+        <div className="dash-card"><div className="v">{weekEntries.length}{plannedWeek?<small>/{plannedWeek}</small>:null}</div><div className="l">Cumplido esta semana{plannedWeek?` · ${rateWeek}%`:""}</div></div>
+        <div className="dash-card"><div className="v">{monthCount}</div><div className="l">Este mes</div></div>
+        <div className="dash-card"><div className="v">{total}</div><div className="l">Total cumplidas</div></div>
+        <div className="dash-card"><div className="v">{lunch}<small> / {dinner}</small></div><div className="l">Comidas / Cenas</div></div>
+      </div>
+
+      <div className="dash-section">
+        <h3>Por tipo de comida</h3>
+        <div className="split-row"><span className="sr-label">Comidas</span><div className="split-bar"><div className="sfill" style={{width:Math.max(lunchPct,8)+"%",background:"var(--coral)"}}>{lunch}</div></div></div>
+        <div className="split-row"><span className="sr-label">Cenas</span><div className="split-bar"><div className="sfill" style={{width:Math.max(dinnerPct,8)+"%",background:"var(--blue)"}}>{dinner}</div></div></div>
+      </div>
+
+      <div className="dash-section">
+        <h3>Por día de la semana</h3>
+        <div className="dow-chart">
+          {dow.map((v,i)=>(
+            <div className="dow-col" key={i}>
+              <span className="dow-val">{v||""}</span>
+              <div className="dow-bar" style={{height:(v/maxDow*100)+"%"}}></div>
+              <span className="dow-lbl">{DAY_NAMES[i].slice(0,1)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExpensesView({ expenses, onAdd, onDelete }) {
+  const [store2, setStore2] = useState("mercadona");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(dateKey(new Date()));
+  const [mode, setMode] = useState("week"); // week | month
+  const [offset, setOffset] = useState(0);
+
+  function add(){
+    const a = parseFloat(String(amount).replace(",","."));
+    if(!a || a<=0) return;
+    onAdd({ id:Date.now()+"", store:store2, amount:Math.round(a*100)/100, date });
+    setAmount("");
+  }
+
+  const now = new Date();
+  let rangeStart, rangeEnd, label;
+  if(mode==="week"){
+    rangeStart = addDays(startOfWeek(now), offset*7);
+    rangeEnd = addDays(rangeStart, 7);
+    label = `${fmtDate(rangeStart)} – ${fmtDate(addDays(rangeStart,6))}`;
+  } else {
+    const base = new Date(now.getFullYear(), now.getMonth()+offset, 1);
+    rangeStart = base;
+    rangeEnd = new Date(base.getFullYear(), base.getMonth()+1, 1);
+    label = base.toLocaleDateString("es-ES",{month:"long",year:"numeric"});
+  }
+  const inRange = expenses.filter(e=>{ const d=new Date(e.date+"T00:00:00"); return d>=rangeStart && d<rangeEnd; })
+    .sort((a,b)=> a.date<b.date?1:-1);
+  const total = inRange.reduce((s,e)=>s+e.amount,0);
+  const byStore = {};
+  STORE_ORDER.forEach(s=>byStore[s]=0);
+  inRange.forEach(e=>{ byStore[e.store]=(byStore[e.store]||0)+e.amount; });
+  const maxStore = Math.max(1, ...STORE_ORDER.map(s=>byStore[s]));
+  const eur = (n)=> n.toFixed(2).replace(".",",")+" €";
+
+  return (
+    <div>
+      <div className="exp-add">
+        <h3>Añadir gasto</h3>
+        <div className="store-pick">
+          {STORE_ORDER.map(s=>{
+            const info=STORE_INFO[s];
+            return <button key={s} className={store2===s?"active":""} style={store2===s?{background:info.color}:{}} onClick={()=>setStore2(s)}>{info.label}</button>;
+          })}
+        </div>
+        <div className="exp-fields">
+          <input className="amount" type="number" inputMode="decimal" placeholder="Importe €" value={amount} onChange={e=>setAmount(e.target.value)} />
+          <input type="date" value={date} onChange={e=>setDate(e.target.value)} />
+        </div>
+        <button className="add-exp-btn" onClick={add}>Añadir gasto</button>
+      </div>
+
+      <div className="period-nav">
+        <div className="seg2">
+          <button className={mode==="week"?"active":""} onClick={()=>{setMode("week");setOffset(0);}}>Semana</button>
+          <button className={mode==="month"?"active":""} onClick={()=>{setMode("month");setOffset(0);}}>Mes</button>
+        </div>
+        <div className="period-label">
+          <button onClick={()=>setOffset(o=>o-1)} aria-label="Anterior">‹</button>
+          <span className="pl-txt">{label}</span>
+          <button onClick={()=>setOffset(o=>Math.min(0,o+1))} aria-label="Siguiente">›</button>
+        </div>
+      </div>
+
+      <div className="exp-total"><div className="v">{eur(total)}</div><div className="l">Total {mode==="week"?"de la semana":"del mes"}</div></div>
+
+      {STORE_ORDER.map(s=>{
+        const info=STORE_INFO[s]; const v=byStore[s]||0;
+        return (
+          <div className="exp-store-row" key={s}>
+            <span className="esr-label"><span className="store-dot" style={{background:info.color}}></span>{info.label}</span>
+            <div className="esr-bar"><div className="esr-fill" style={{width:(v/maxStore*100)+"%",background:info.color}}></div></div>
+            <span className="esr-val">{eur(v)}</span>
+          </div>
+        );
+      })}
+
+      <div className="dash-section">
+        <h3>Movimientos</h3>
+        {inRange.length===0 && <div className="dash-empty" style={{padding:"20px"}}>No hay gastos en este periodo.</div>}
+        {inRange.map(e=>{
+          const info=STORE_INFO[e.store];
+          const d=new Date(e.date+"T00:00:00");
+          return (
+            <div className="exp-list-item" key={e.id}>
+              <span className="eli-dot" style={{background:info.color}}></span>
+              <div className="eli-store">{info.label}<div className="eli-date">{d.toLocaleDateString("es-ES",{day:"numeric",month:"short"})}</div></div>
+              <span className="eli-amount">{eur(e.amount)}</span>
+              <button className="del" onClick={()=>onDelete(e.id)} aria-label="Eliminar">✕</button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const today = new Date();
+  const [view, setView] = useState("menu");
+  const [weeks, setWeeks] = useState(()=>{ const s=store.get("menu_weeks_v4",null); return (s&&s.length)?s:[makeWeek(startOfWeek(today),0)]; });
+  const [log, setLog] = useState(()=>store.get("menu_log_v4",{}));
+  const [expenses, setExpenses] = useState(()=>store.get("menu_expenses_v4",[]));
+  const [activeWeekIdx, setActiveWeekIdx] = useState(0);
+  const [activeMeal, setActiveMeal] = useState(null);
+  const [showCart, setShowCart] = useState(false);
+  const [showSetup, setShowSetup] = useState(null); // null | {mode:'create'|'regen', weekKey?}
+
+  useEffect(()=>{ store.set("menu_weeks_v4", weeks); }, [weeks]);
+  useEffect(()=>{ store.set("menu_log_v4", log); }, [log]);
+  useEffect(()=>{ store.set("menu_expenses_v4", expenses); }, [expenses]);
+
+  function updateEntry(weekKey, cell, ne){
+    setWeeks(ws=>ws.map(w=>{ if(w.key!==weekKey) return w; const plan={...w.plan}; if(ne===null) delete plan[cell]; else plan[cell]=ne; return {...w,plan}; }));
+  }
+  function patchEntry(weekKey, cell, patch){
+    setWeeks(ws=>ws.map(w=>{ if(w.key!==weekKey) return w; const e=w.plan[cell]; if(!e) return w; return {...w,plan:{...w.plan,[cell]:{...e,...patch}}}; }));
+  }
+  function toggleOffice(weekKey, cell){
+    setWeeks(ws=>ws.map(w=>{ if(w.key!==weekKey) return w; const e=w.plan[cell]; if(!e||e.type==="eatout") return w; return {...w,plan:{...w.plan,[cell]:{...e,office:!e.office}}}; }));
+  }
+  function cycleDiners(weekKey, cell){
+    setWeeks(ws=>ws.map(w=>{ if(w.key!==weekKey) return w; const e=w.plan[cell]; if(!e||e.type==="eatout") return w; const order={both:"me",me:"ruben",ruben:"both"}; return {...w,plan:{...w.plan,[cell]:{...e,diners:order[e.diners||"both"]}}}; }));
+  }
+  function toggleComplied(dateISO, slot){
+    const k=dateISO+"_"+slot; setLog(l=>{ const n={...l}; if(n[k]) delete n[k]; else n[k]=true; return n; });
+  }
+  function regenWeek(weekKey){
+    setWeeks(ws=>ws.map(w=>{ if(w.key!==weekKey) return w; const salt=(w.salt||0)+1; return {...w,salt,plan:generatePlan(w.key+":"+salt,new Date(w.start),w.config),shopping:{checked:{},have:{},extra:[]}}; }));
+  }
+  function addExpense(e){ setExpenses(xs=>xs.concat([e])); }
+  function deleteExpense(id){ setExpenses(xs=>xs.filter(e=>e.id!==id)); }
+  function confirmSetup(startDate, cfg){
+    if(!showSetup) return;
+    if(showSetup.mode==="create"){
+      setWeeks(ws=>{ if(ws.length>=2) return ws; return ws.concat([makeWeek(startDate,0,cfg)]); });
+      setActiveWeekIdx(1);
+    } else {
+      const wk = weeks.find(x=>x.key===showSetup.weekKey);
+      const salt = wk ? (wk.salt||0)+1 : 0;
+      setWeeks(ws=>ws.map(x=> x.key===showSetup.weekKey ? makeWeek(startDate, salt, cfg) : x));
+    }
+    setShowSetup(null);
+  }
+  function updateShopping(weekKey, shopping){ setWeeks(ws=>ws.map(w=>w.key===weekKey?{...w,shopping}:w)); }
+
+  const safeIdx = Math.min(activeWeekIdx, weeks.length-1);
+  const w = weeks[safeIdx];
+  const wStart = new Date(w.start), wEnd = addDays(wStart,6);
+
+  function openMeal(week, dayIdx, slot){
+    const cell=dayIdx+"_"+slot.key;
+    setActiveMeal({ weekKey:week.key, cell, slotKey:slot.key, slotLabel:slot.label, dayName:DAY_NAMES[dayIdx], entry:week.plan[cell]||null });
+  }
+
+  return (
+    <div>
+      <header className="app-header">
+        <div className="header-top">
+          <div><p className="eyebrow">Tú y Rubén</p><h1 className="display">Menú semanal</h1></div>
+          <button className="cart-btn" onClick={()=>setShowCart(true)} aria-label="Lista de la compra">🛒</button>
+        </div>
+        <div className="nav-tabs">
+          <button className={view==="menu"?"active":""} onClick={()=>setView("menu")}>Menú</button>
+          <button className={view==="gastos"?"active":""} onClick={()=>setView("gastos")}>Gastos</button>
+          <button className={view==="dash"?"active":""} onClick={()=>setView("dash")}>Progreso</button>
+        </div>
+      </header>
+
+      <main className="content">
+        {view==="menu" ? (
+          <React.Fragment>
+            {weeks.length===2 && (
+              <div className="week-pager">{weeks.map((wk,i)=>(<button key={wk.key} className={i===safeIdx?"active":""} onClick={()=>setActiveWeekIdx(i)}>{i===0?"Esta semana":"Próxima semana"}</button>))}</div>
+            )}
+            <div className="week-subhead">
+              <div><div className="wk-name">{safeIdx===0?"Esta semana":"Próxima semana"}</div><div className="wk-range">{fmtDate(wStart)} – {fmtDate(wEnd)}</div></div>
+              <button className="regen-btn" onClick={()=>setShowSetup({mode:"regen", weekKey:w.key})}>↻ Regenerar</button>
+            </div>
+            {Array.from({length:7}).map((_,dayIdx)=>{
+              const dDate=addDays(wStart,dayIdx); const isToday=isSameDay(dDate,today);
+              const isPast=dDate<startOfToday() && !isToday; const dISO=dateKey(dDate);
+              return (
+                <div className={"day-block"+(isToday?" is-today":"")+(isPast?" is-past":"")} key={dayIdx}>
+                  <div className="day-heading">
+                    <span className="day-name">{dayLabel(dDate)}</span>
+                    <span className="day-date">{fmtDate(dDate)}</span>
+                    {isToday && <span className="today-pill">Hoy</span>}
+                    {isPast && <span className="past-pill">Pasado</span>}
+                  </div>
+                  <div className="meal-row">
+                    {SLOTS.map(slot=>(
+                      <MealCard key={slot.key}
+                        entry={w.plan[dayIdx+"_"+slot.key]||null}
+                        slotKey={slot.key} slotLabel={slot.label} dateISO={dISO} date={dDate}
+                        complied={!!log[dISO+"_"+slot.key]}
+                        onOpen={()=>openMeal(w,dayIdx,slot)}
+                        onToggleOffice={()=>toggleOffice(w.key,dayIdx+"_"+slot.key)}
+                        onCycleDiners={()=>cycleDiners(w.key,dayIdx+"_"+slot.key)}
+                        onToggleComplied={()=>toggleComplied(dISO,slot.key)} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+            {weeks.length<2
+              ? <button className="create-btn" onClick={()=>setShowSetup({mode:"create"})}>＋ Crear menú de la próxima semana</button>
+              : <button className="create-btn disabled" disabled>Ya tienes 2 semanas planificadas</button>}
+          </React.Fragment>
+        ) : view==="gastos" ? (
+          <ExpensesView expenses={expenses} onAdd={addExpense} onDelete={deleteExpense} />
+        ) : (
+          <Dashboard log={log} weeks={weeks} />
+        )}
+      </main>
+
+      {activeMeal && <MealSheet context={activeMeal}
+        onClose={()=>setActiveMeal(null)}
+        onUpdate={updateEntry}
+        onPatch={(patch)=>{ patchEntry(activeMeal.weekKey, activeMeal.cell, patch); setActiveMeal(am=>am?{...am,entry:{...am.entry,...patch}}:am); }} />}
+      {showCart && <ShoppingSheet weeks={weeks} initialWeekKey={w.key} onClose={()=>setShowCart(false)} onUpdateShopping={updateShopping} />}
+      {showSetup && (()=>{
+        const isCreate = showSetup.mode==="create";
+        const anchor = addDays(new Date(weeks[weeks.length-1].start),7);
+        const setupWeek = isCreate ? null : weeks.find(x=>x.key===showSetup.weekKey);
+        const computeStart = isCreate ? (dow)=>nearestDow(anchor, dow) : (dow)=>mostRecentDow(today, dow);
+        const initialDow = isCreate ? anchor.getDay() : (setupWeek ? new Date(setupWeek.start).getDay() : today.getDay());
+        const initialConfig = (!isCreate && setupWeek) ? setupWeek.config : defaultConfig();
+        return <WeekSetupPopup
+          eyebrow={isCreate?"Próxima semana":"Regenerar semana"}
+          title={isCreate?"Crear menú":"Regenerar menú"}
+          confirmLabel={isCreate?"Generar menú":"Regenerar"}
+          computeStart={computeStart} initialDow={initialDow} initialConfig={initialConfig}
+          onConfirm={confirmSetup} onCancel={()=>setShowSetup(null)} />;
+      })()}
+    </div>
+  );
+}
+
+// ============================================================================
+//  PANTALLA DE CARGA Y ARRANQUE (app pública, sin login)
+// ============================================================================
+function Splash({ text }){
+  return (
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",
+      flexDirection:"column",gap:14,background:"var(--paper)",color:"var(--ink-soft)"}}>
+      <div style={{width:34,height:34,border:"3px solid var(--line)",borderTopColor:"var(--sage)",
+        borderRadius:"50%",animation:"spin 0.8s linear infinite"}}></div>
+      <div style={{fontWeight:600,fontSize:14}}>{text||"Cargando…"}</div>
+      <style>{"@keyframes spin{to{transform:rotate(360deg)}}"}</style>
+    </div>
+  );
+}
+
+function Root(){
+  // App pública: sin login. Cargamos los datos directamente y mostramos la app.
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    loadAll(sb ? PUBLIC_USER_ID : null).then(()=> setReady(true));
+  }, []);
+
+  if (!ready) return <Splash text="Cargando tu menú…" />;
+  return <App />;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
+</script>
+</body>
+</html>
