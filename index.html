@@ -558,7 +558,179 @@ const RECIPE_BANK = [
       G("1 bolsa de ensalada variada","Ensalada variada",1,"bolsa","V",F),
       G("1 limón","Limón",1,"ud","V",F),
       S("Aceite y sal",["Aceite de oliva","Sal"])],
-    steps:["Salpimenta la merluza.","Pásala por huevo batido y pan rallado.","Fríela en aceite caliente 2-3 min por lado.","Escurre en papel.","Sirve con ensalada y limón."] }
+    steps:["Salpimenta la merluza.","Pásala por huevo batido y pan rallado.","Fríela en aceite caliente 2-3 min por lado.","Escurre en papel.","Sirve con ensalada y limón."] },
+
+  // ===========================================================================
+  //  PLATOS DE SIEMPRE (favoritos de Fa y Rubén). Aparecen algunos cada semana.
+  // ===========================================================================
+
+  // ----- COMIDAS de siempre -----
+  { id:"r28", name:"Quiche de bacon y espinacas", slot:"lunch", time:45, kcal:520, protein:30, fiberRich:false, tupper:true, favorite:true,
+    ingredients:[
+      G("1 masa de quiche","Masa de quiche",1,"ud","C",X),
+      G("80g de queso rallado","Queso rallado",80,"g","P",X),
+      G("100ml de nata de soja","Nata de soja",100,"ml","O",X),
+      G("150g de champiñones","Champiñones",150,"g","V",F),
+      G("5 huevos","Huevos",5,"ud","P",X),
+      G("100g de bacon","Bacon",100,"g","P",X),
+      G("100g de espinacas baby","Espinacas baby",100,"g","V",F),
+      S("Sal y pimienta",["Sal","Pimienta"])],
+    steps:["Precalienta el horno a 190°C y forra un molde con la masa.","Saltea el bacon y los champiñones; añade las espinacas hasta que reduzcan.","Bate los huevos con la nata de soja, sal y pimienta.","Reparte el salteado sobre la masa y vierte el batido.","Cubre con el queso rallado y hornea 30-35 min."] },
+
+  { id:"r29", name:"Ensalada de verano (macarrones)", slot:"lunch", time:20, kcal:520, protein:26, fiberRich:false, tupper:true, favorite:true,
+    ingredients:[
+      G("200g de macarrones","Macarrones",200,"g","C",X,2.2),
+      G("3 huevos cocidos","Huevos",3,"ud","P",X),
+      G("1 lata de maíz","Maíz",1,"lata","O",X),
+      G("1 zanahoria","Zanahoria",1,"ud","V",F),
+      G("100g de queso fresco","Queso fresco",100,"g","P",X),
+      G("1 pimiento rojo","Pimiento rojo",1,"ud","V",F,null,"ruben"),
+      S("Aceite, vinagre y sal",["Aceite de oliva","Vinagre","Sal"])],
+    steps:["Cuece los macarrones y enfríalos bajo el grifo.","Cuece los huevos 10 min y trocéalos.","Ralla o pica la zanahoria y el pimiento.","Mezcla todo con el maíz y el queso fresco en dados.","Aliña y sirve frío."] },
+
+  { id:"r30", name:"Ensalada campera", slot:"lunch", time:20, kcal:430, protein:28, fiberRich:false, tupper:true, fish:true, favorite:true,
+    ingredients:[
+      G("3 patatas cocidas","Patata",3,"ud","C",F),
+      G("1 pimiento verde","Pimiento verde",1,"ud","V",F),
+      G("1 cebolleta","Cebolleta",1,"ud","V",F),
+      G("2 huevos cocidos","Huevos",2,"ud","P",X),
+      G("1 lata de atún","Atún al natural",1,"lata","P",X),
+      G("Aceitunas (al gusto)","Aceitunas",50,"g","O",X,null,"me"),
+      S("Aceite, vinagre y sal",["Aceite de oliva","Vinagre","Sal"])],
+    steps:["Cuece las patatas y déjalas templar; córtalas en dados.","Cuece los huevos 10 min.","Pica el pimiento verde y la cebolleta.","Mezcla con el atún escurrido y las aceitunas.","Aliña y sirve."] },
+
+  { id:"r31", name:"Tortilla de patata", slot:"lunch", time:40, kcal:450, protein:22, fiberRich:false, tupper:true, favorite:true,
+    note:"La suele hacer Rubén el viernes o el fin de semana.",
+    ingredients:[
+      G("5 patatas","Patata",5,"ud","C",F),
+      G("6 huevos","Huevos",6,"ud","P",X),
+      G("1 cebolla","Cebolla",1,"ud","V",F),
+      S("Aceite de oliva y sal",["Aceite de oliva","Sal"])],
+    steps:["Pela y corta las patatas finas; pocha en aceite con la cebolla 20 min.","Escurre bien el aceite.","Bate los huevos con sal y mézclalos con la patata.","Cuaja en la sartén 3-4 min por cada lado.","Deja reposar antes de cortar."] },
+
+  { id:"r32", name:"Hamburguesa con queso", slot:"lunch", time:20, kcal:540, protein:34, fiberRich:false, tupper:false, favorite:true,
+    ingredients:[
+      G("2 panes de hamburguesa","Pan de hamburguesa",2,"ud","C",X),
+      G("2 hamburguesas","Hamburguesa",2,"ud","P",M),
+      G("2 lonchas de queso","Queso en lonchas",2,"loncha","P",X),
+      G("Lechuga","Lechuga",1,"ud","V",F),
+      G("1 tomate","Tomate",1,"ud","V",F,null,"ruben"),
+      S("Aceite, sal y pimienta",["Aceite de oliva","Sal","Pimienta"])],
+    steps:["Salpimenta y cocina las hamburguesas 4-5 min por lado.","Pon el queso encima para que funda.","Tuesta ligeramente los panes.","Monta con lechuga y tomate."] },
+
+  { id:"r33", name:"Salmón a la plancha con brócoli y boniato", slot:"lunch", time:25, kcal:520, protein:40, fiberRich:false, tupper:true, fish:true, favorite:true,
+    ingredients:[
+      G("Salmón (300g)","Salmón",300,"g","P",M),
+      G("1 brócoli","Brócoli",1,"ud","V",F),
+      G("2 boniatos","Boniato",2,"ud","C",F),
+      S("Aceite, sal y limón",["Aceite de oliva","Sal"])],
+    steps:["Horno a 200°C: asa el boniato en cuñas 20-25 min.","Cuece o haz el brócoli al vapor 5-6 min.","Haz el salmón a la plancha 3-4 min por lado.","Sirve con un toque de limón."] },
+
+  // ----- CENAS de siempre -----
+  { id:"r34", name:"Kéfir con fruta", slot:"dinner", time:5, kcal:280, protein:14, fiberRich:true, tupper:false, favorite:true,
+    ingredients:[
+      G("500g de kéfir","Kéfir",500,"g","P",X),
+      G("2 piezas de fruta","Fruta variada",2,"ud","V",F),
+      S("Avena o semillas (opcional)",["Avena","Semillas"])],
+    steps:["Reparte el kéfir en dos boles.","Añade la fruta troceada.","Espolvorea avena o semillas al gusto."] },
+
+  { id:"r35", name:"Sándwich de pavo y queso", slot:"dinner", time:8, kcal:360, protein:26, fiberRich:false, tupper:false, favorite:true,
+    ingredients:[
+      G("4 rebanadas de pan integral","Pan de molde integral",4,"rebanada","C",X),
+      G("6 lonchas de jamón de pavo","Jamón de pavo",6,"loncha","P",X),
+      G("2 lonchas de queso","Queso en lonchas",2,"loncha","P",X),
+      G("Lechuga","Lechuga",1,"ud","V",F),
+      S("Aceite o mostaza (opcional)",["Aceite de oliva"])],
+    steps:["Tuesta el pan si quieres.","Monta con el pavo, el queso y la lechuga.","Cierra y, si te gusta, dale un golpe de plancha o sandwichera."] },
+
+  { id:"r36", name:"Puré con tortilla francesa", slot:"dinner", time:12, kcal:330, protein:24, fiberRich:false, tupper:false, isPuree:true, favorite:true,
+    note:"El puré lo compramos hecho del Mercadona. Tortilla francesa: Rubén con huevos enteros; Fa con 1 huevo + claras (o solo claras) para menos calorías.",
+    ingredients:[
+      G("2 purés de verdura preparados","Puré de verduras (preparado)",2,"ud","V",X),
+      G("Huevos","Huevos",5,"ud","P",X),
+      S("Claras de huevo, aceite y sal",["Claras de huevo","Aceite de oliva","Sal"])],
+    steps:["Calienta el puré comprado.","Para Rubén: bate 2-3 huevos enteros.","Para Fa: bate 1 huevo con claras (o solo claras).","Cuaja cada tortilla en la sartén con unas gotas de aceite."] },
+
+  { id:"r37", name:"Pizza casera (jamón, atún y piña)", slot:"dinner", time:25, kcal:620, protein:36, fiberRich:false, tupper:false, fish:true, favorite:true,
+    rubenNote:"Lleva salsa de tomate. Si Rubén la prefiere sin tomate, usa una base fina de queso o crème fraîche en su mitad.",
+    ingredients:[
+      G("1 masa de pizza","Masa de pizza",1,"ud","C",X),
+      G("100g de salsa de tomate","Salsa de tomate",100,"g","O",X),
+      G("100g de queso rallado","Queso rallado",100,"g","P",X),
+      G("4 lonchas de jamón york","Jamón york",4,"loncha","P",X),
+      G("100g de piña","Piña",100,"g","O",X),
+      G("1 lata de atún","Atún al natural",1,"lata","P",X),
+      G("80g de bacon","Bacon",80,"g","P",X),
+      S("Orégano",["Orégano"])],
+    steps:["Horno a 220°C.","Extiende la salsa de tomate sobre la masa.","Reparte el queso, el jamón, el atún, el bacon y la piña.","Espolvorea orégano.","Hornea 12-15 min hasta que dore."] },
+
+  // ===========================================================================
+  //  NUEVOS (propuestas más variadas y saludables)
+  // ===========================================================================
+
+  // ----- COMIDAS nuevas -----
+  { id:"r38", name:"Dahl de lentejas rojas con arroz basmati", slot:"lunch", time:30, kcal:480, protein:24, fiberRich:true, tupper:true,
+    rubenNote:"Lleva tomate triturado. Para Rubén, sustitúyelo por un poco más de caldo o leche de coco.",
+    ingredients:[
+      G("200g de lentejas rojas","Lentejas rojas",200,"g","P",X,2.4),
+      G("150g de arroz basmati","Arroz basmati",150,"g","C",X,2.6),
+      G("1 cebolla","Cebolla",1,"ud","V",F),
+      G("1 zanahoria","Zanahoria",1,"ud","V",F),
+      G("200g de tomate triturado","Tomate triturado",200,"g","O",X),
+      G("1 diente de ajo","Ajo",1,"diente","V",F),
+      S("Curry, comino, jengibre, aceite y sal",["Curry","Comino","Jengibre","Aceite de oliva","Sal"])],
+    steps:["Sofríe la cebolla, el ajo y la zanahoria.","Añade las especias y el tomate, 3 min.","Incorpora las lentejas rojas y agua/caldo hasta cubrir.","Cuece 18-20 min hasta cremoso.","Sirve con el arroz basmati."] },
+
+  { id:"r39", name:"Tacos de pavo con aguacate y maíz", slot:"lunch", time:20, kcal:500, protein:34, fiberRich:true, tupper:false,
+    ingredients:[
+      G("250g de carne picada de pavo","Carne picada de pavo",250,"g","P",M),
+      G("6 tortillas integrales","Tortillas integrales",6,"ud","C",X),
+      G("1 aguacate","Aguacate",1,"ud","Ft",F),
+      G("1 lata de maíz","Maíz",1,"lata","O",X),
+      G("1 tomate","Tomate",1,"ud","V",F,null,"ruben"),
+      G("Lechuga","Lechuga",1,"ud","V",F),
+      S("Comino, pimentón, aceite y sal",["Comino","Pimentón","Aceite de oliva","Sal"])],
+    steps:["Saltea el pavo con comino y pimentón, 6-7 min.","Calienta las tortillas.","Prepara aguacate, tomate y lechuga.","Rellena cada taco con el pavo y las verduras."] },
+
+  { id:"r40", name:"Salmón teriyaki con arroz integral y brócoli", slot:"lunch", time:25, kcal:560, protein:42, fiberRich:false, tupper:true, fish:true,
+    ingredients:[
+      G("Salmón (300g)","Salmón",300,"g","P",M),
+      G("150g de arroz integral","Arroz integral",150,"g","C",X,2.8),
+      G("1 brócoli","Brócoli",1,"ud","V",F),
+      S("Salsa teriyaki o de soja",["Salsa teriyaki"]),
+      S("Sésamo y aceite",["Sésamo","Aceite de oliva"])],
+    steps:["Cuece el arroz integral.","Haz el brócoli al vapor 5-6 min.","Marca el salmón a la plancha y glaséalo con el teriyaki.","Sirve con sésamo por encima."] },
+
+  // ----- CENAS nuevas -----
+  { id:"r41", name:"Tosta integral de hummus, pavo y tomate", slot:"dinner", time:10, kcal:380, protein:24, fiberRich:true, tupper:false,
+    ingredients:[
+      G("4 rebanadas de pan integral","Pan integral",4,"rebanada","C",X),
+      G("100g de hummus","Hummus",100,"g","P",X),
+      G("6 lonchas de pavo","Jamón de pavo",6,"loncha","P",X),
+      G("1 tomate","Tomate",1,"ud","V",F,null,"ruben"),
+      G("Rúcula o canónigos","Rúcula",1,"bolsa","V",F),
+      S("Aceite y pimienta",["Aceite de oliva","Pimienta"])],
+    steps:["Tuesta el pan.","Unta el hummus.","Coloca el pavo, el tomate en rodajas y la rúcula.","Termina con un hilo de aceite y pimienta."] },
+
+  { id:"r42", name:"Salteado de tofu con verduras y soja", slot:"dinner", time:20, kcal:360, protein:26, fiberRich:true, tupper:true,
+    ingredients:[
+      G("300g de tofu firme","Tofu firme",300,"g","P",X),
+      G("1 pimiento","Pimiento",1,"ud","V",F),
+      G("1 calabacín","Calabacín",1,"ud","V",F),
+      G("1 zanahoria","Zanahoria",1,"ud","V",F),
+      S("Salsa de soja",["Salsa de soja"]),
+      S("Aceite y sésamo",["Aceite de oliva","Sésamo"])],
+    steps:["Escurre y corta el tofu en dados; dóralo bien por todas las caras.","Reserva el tofu y saltea las verduras en tiras 5-6 min.","Devuelve el tofu, añade la soja y saltea 1 min.","Sirve con sésamo."] },
+
+  { id:"r43", name:"Revuelto de gambas, ajetes y espárragos", slot:"dinner", time:15, kcal:340, protein:28, fiberRich:false, tupper:false, fish:true,
+    note:"Para Fa, usa 1 huevo + claras (o solo claras); Rubén con huevos enteros.",
+    ingredients:[
+      G("200g de gambas peladas","Gambas peladas",200,"g","P",M),
+      G("1 manojo de ajetes","Ajetes",1,"ud","V",F),
+      G("1 manojo de espárragos verdes","Espárragos verdes",1,"ud","V",F),
+      G("5 huevos","Huevos",5,"ud","P",X),
+      S("Claras, aceite y sal",["Claras de huevo","Aceite de oliva","Sal"])],
+    steps:["Saltea los ajetes y los espárragos troceados 5 min.","Añade las gambas 2 min.","Incorpora los huevos batidos (claras para Fa) y remueve hasta cuajar."] }
 ];
 
 const SLOTS = [ { key:"lunch", label:"Comida" }, { key:"dinner", label:"Cena" } ];
@@ -627,15 +799,45 @@ function generatePlan(seedStr, weekStart, config){
   }
   ensureFish(plan, rng);
   ensurePuree(plan, rng);
+  ensureFavorites(plan, rng);
   return plan;
+}
+
+// Garantiza que cada semana aparezcan algunos "platos de siempre" (favoritos),
+// dejando el resto para platos nuevos/variados. No toca el pescado ni el puré:
+// solo sustituye celdas que no son ni pescado ni puré.
+function ensureFavorites(plan, rng){
+  const TARGET = 4; // mínimo de platos de siempre por semana
+  const favLunch = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"&&r.favorite), rng);
+  const favLunchTup = favLunch.filter(r=>r.tupper);
+  const favDinner = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&r.favorite), rng);
+  const isFav = k => { const r=getRecipeById(plan[k].recipeId); return r&&r.favorite; };
+  const isProtected = k => { const r=getRecipeById(plan[k].recipeId); return r&&(r.fish||r.isPuree); };
+  const favCells = () => recipeCells(plan).filter(isFav);
+  let guard=0;
+  while(favCells().length<TARGET && guard++<14){
+    // Sustituimos celdas que NO son favoritas y NO están protegidas (pescado/puré).
+    const cells = recipeCells(plan).filter(k=>!isFav(k)&&!isProtected(k));
+    if(!cells.length) break;
+    let done=false;
+    for(const k of cells){
+      const isLunch = k.endsWith("lunch");
+      const pool = isLunch ? (plan[k].office?favLunchTup:favLunch) : favDinner;
+      const have = new Set(recipeCells(plan).map(c=>plan[c].recipeId));
+      const cand = pool.find(r=>!have.has(r.id));
+      if(cand){ plan[k]={...plan[k], recipeId:cand.id}; done=true; break; }
+    }
+    if(!done) break;
+  }
 }
 
 function ensureFish(plan, rng){
   // Objetivo: 2 días de pescado a la semana (mínimo 1). Si hay más, se reduce; si hay menos, se añade.
   const TARGET = 2;
-  const fishLunch = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"&&r.fish), rng);
+  const favFirst = (a,b)=> (b.favorite?1:0)-(a.favorite?1:0); // favoritos primero
+  const fishLunch = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"&&r.fish), rng).sort(favFirst);
   const fishLunchTup = fishLunch.filter(r=>r.tupper);
-  const fishDinner = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&r.fish), rng);
+  const fishDinner = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&r.fish), rng).sort(favFirst);
   const noFishLunch = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"&&!r.fish), rng);
   const noFishLunchTup = noFishLunch.filter(r=>r.tupper);
   const noFishDinner = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&!r.fish), rng);
@@ -645,7 +847,7 @@ function ensureFish(plan, rng){
   let guard=0;
   while(fishCells().length<TARGET && guard++<12){
     const cells = recipeCells(plan).filter(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&!r.fish; })
-      .sort((a,b)=> (a.endsWith("dinner")?0:1)-(b.endsWith("dinner")?0:1));
+      .sort((a,b)=>{ const fa=(getRecipeById(plan[a].recipeId)||{}).favorite?1:0, fb=(getRecipeById(plan[b].recipeId)||{}).favorite?1:0; if(fa!==fb) return fa-fb; return (a.endsWith("dinner")?0:1)-(b.endsWith("dinner")?0:1); });
     let done=false;
     for(const k of cells){
       const isLunch = k.endsWith("lunch");
@@ -659,7 +861,8 @@ function ensureFish(plan, rng){
   // Quitar pescado de más (dejar TARGET)
   guard=0;
   while(fishCells().length>TARGET && guard++<12){
-    const k = fishCells()[fishCells().length-1];
+    const fcs = fishCells();
+    const k = fcs.find(c=>{ const r=getRecipeById(plan[c].recipeId); return r&&!r.favorite; }) || fcs[fcs.length-1];
     const isLunch = k.endsWith("lunch");
     const pool = isLunch ? (plan[k].office?noFishLunchTup:noFishLunch) : noFishDinner;
     const have = new Set(recipeCells(plan).map(c=>plan[c].recipeId));
@@ -670,9 +873,10 @@ function ensureFish(plan, rng){
 function ensurePuree(plan, rng){
   const dinners = recipeCells(plan).filter(k=>k.endsWith("dinner"));
   if(dinners.some(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&r.isPuree; })) return;
-  const purees = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&r.isPuree), rng);
+  const purees = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&r.isPuree), rng).sort((a,b)=>(b.favorite?1:0)-(a.favorite?1:0));
   if(!purees.length) return;
-  const target = dinners.find(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&!r.fish; }) || dinners[0];
+  const target = dinners.find(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&!r.fish&&!r.favorite; })
+    || dinners.find(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&!r.fish; }) || dinners[0];
   if(target){ const have=new Set(recipeCells(plan).map(c=>plan[c].recipeId)); const cand=purees.find(r=>!have.has(r.id))||purees[0]; plan[target]={...plan[target], recipeId:cand.id}; }
 }
 
@@ -830,9 +1034,11 @@ function IngredientRow({ ing, persons }) {
       <li>
         <div className="ing-name">{ing.n}</div>
         <div className="pp">
-          {persons.includes("me") && (() => { const raw=personRaw(ing,"me"); return (
+          {persons.includes("me") && (ing.dis==="me"
+            ? <span className="me">Yo: — (no tomo)</span>
+            : (() => { const raw=personRaw(ing,"me"); return (
             <span className="me">Yo: {raw}{ing.u}{ing.ck?<span className="ck"> (≈{Math.round(raw*ing.ck)}{ing.u} cocido)</span>:null}</span>
-          ); })()}
+          ); })())}
           {persons.includes("ruben") && (ing.dis==="ruben"
             ? <span className="ruben">Rubén: — (no toma)</span>
             : (() => { const raw=personRaw(ing,"ruben"); return (
@@ -842,7 +1048,7 @@ function IngredientRow({ ing, persons }) {
       </li>
     );
   }
-  return <li><span className="ing-name">{ing.d}</span>{ing.dis==="ruben" && persons.includes("ruben") ? <span className="pp"><span className="ruben">Rubén no lo toma</span></span> : null}</li>;
+  return <li><span className="ing-name">{ing.d}</span>{ing.dis==="ruben" && persons.includes("ruben") ? <span className="pp"><span className="ruben">Rubén no lo toma</span></span> : null}{ing.dis==="me" && persons.includes("me") ? <span className="pp"><span className="me">Fa no lo toma</span></span> : null}</li>;
 }
 
 function RecipeDetail({ recipe, ingredients, edited, diners, onEdit, onEditIngredients, onEatOut, onClear }) {
@@ -855,6 +1061,9 @@ function RecipeDetail({ recipe, ingredients, edited, diners, onEdit, onEditIngre
         <h2>{recipe.name}</h2>
         <div className="badge-row">
           <span className="badge meal">{recipe.slot==="lunch"?"🍽️ Comida":"🌙 Cena"}</span>
+          {recipe.favorite
+            ? <span className="badge" style={{background:"var(--plum-pale)",color:"var(--plum)"}}>⭐ De siempre</span>
+            : <span className="badge" style={{background:"var(--sage-pale)",color:"var(--sage)"}}>✨ Nuevo</span>}
           {recipe.fiberRich && <span className="badge fiber">Rica en fibra</span>}
           {recipe.tupper && <span className="badge tupper">🍱 Apto tupper</span>}
           {edited && <span className="badge" style={{background:"var(--gold)",color:"#fff"}}>✏️ Editada</span>}
@@ -866,6 +1075,7 @@ function RecipeDetail({ recipe, ingredients, edited, diners, onEdit, onEditIngre
         <div className="macro-pill"><span className="v">{recipe.time}'</span><span className="l">tiempo</span></div>
       </div>
       {recipe.rubenNote && (<div className="sheet-section"><div className="note-box ruben"><strong>Rubén (sin tomate):</strong> {recipe.rubenNote}</div></div>)}
+      {recipe.note && (<div className="sheet-section"><div className="note-box" style={{background:"var(--blue-pale)",color:"#2A5A78"}}><strong>📌 Nota:</strong> {recipe.note}</div></div>)}
       <div className="sheet-section">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
           <h3 style={{margin:0}}>Ingredientes {diners==="both"?"(por persona)":(diners==="me"?"(solo tú)":"(solo Rubén)")}</h3>
