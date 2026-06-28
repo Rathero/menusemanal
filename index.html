@@ -703,6 +703,16 @@ const DATA_KEYS = ["menu_weeks_v4", "menu_log_v4", "menu_expenses_v4"];
 // se escribe en la nube en segundo plano.
 const cache = {};
 
+// Estado del guardado en la nube. Permite avisar EN PANTALLA si algo falla,
+// para que nunca vuelva a fallar en silencio (antes los errores de Supabase
+// se ignoraban y parecía que todo iba bien aunque no se guardara nada).
+const saveStatus = {
+  state: "idle", // idle | saving | saved | error
+  _l: new Set(),
+  set(s){ this.state = s; this._l.forEach(fn => fn(s)); },
+  subscribe(fn){ this._l.add(fn); return () => this._l.delete(fn); }
+};
+
 // Carga TODOS los datos una vez (al entrar). Si no hay Supabase configurado,
 // carga desde el navegador.
 async function loadAll(){
@@ -716,8 +726,18 @@ async function loadAll(){
     // versión MÁS RECIENTE de cada una (por si quedaran filas antiguas).
     const { data, error } = await sb.from("kv").select("key,data,updated_at")
       .order("updated_at", { ascending: true, nullsFirst: true });
-    if (!error && data){ data.forEach(row => { cache[row.key] = row.data; }); }
-  } catch(e){ console.error("No se pudieron cargar los datos", e); }
+    if (error){ console.error("No se pudieron cargar los datos", error); saveStatus.set("error"); }
+    else if (data){ data.forEach(row => { cache[row.key] = row.data; }); }
+  } catch(e){ console.error("No se pudieron cargar los datos", e); saveStatus.set("error"); }
+
+  // Migración única: si quedaban datos guardados solo en este navegador (de una
+  // versión anterior sin nube), los subimos a la base de datos para no perderlos.
+  // A partir de aquí TODO vive en la nube, nada queda atado a este navegador.
+  DATA_KEYS.forEach(k => {
+    if (cache[k] === undefined){
+      try { const v = localStorage.getItem(k); if (v){ cache[k] = JSON.parse(v); pushToCloud(k); } } catch(e){}
+    }
+  });
 }
 
 // Guardado en la nube con un pequeño retardo, para no saturar con cada tecla.
@@ -727,8 +747,13 @@ function pushToCloud(k){
   clearTimeout(_timers[k]);
   _timers[k] = setTimeout(async () => {
     try {
-      await sb.from("kv").upsert({ key: k, data: cache[k], updated_at: new Date().toISOString() }, { onConflict: "key" });
-    } catch(e){ console.error("No se pudo guardar en la nube:", k, e); }
+      // OJO: upsert NO lanza excepción si Supabase rechaza la escritura (p.ej. por
+      // las reglas RLS). Devuelve el error dentro del objeto, así que hay que
+      // comprobarlo a mano; si no, fallaría en silencio.
+      const { error } = await sb.from("kv").upsert({ key: k, data: cache[k], updated_at: new Date().toISOString() }, { onConflict: "key" });
+      if (error){ console.error("No se pudo guardar en la nube:", k, error); saveStatus.set("error"); }
+      else { saveStatus.set("saved"); }
+    } catch(e){ console.error("No se pudo guardar en la nube:", k, e); saveStatus.set("error"); }
   }, 600);
 }
 
@@ -736,7 +761,7 @@ const store = {
   get(k, fb){ const v = cache[k]; return (v===undefined || v===null) ? fb : v; },
   set(k, v){
     cache[k] = v;
-    if (sb) pushToCloud(k);
+    if (sb){ saveStatus.set("saving"); pushToCloud(k); }
     else { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
   }
 };
@@ -1372,6 +1397,25 @@ function ExpensesView({ expenses, onAdd, onDelete }) {
   );
 }
 
+// Aviso flotante del estado de guardado en la nube (no desplaza el contenido).
+function SaveStatusBar(){
+  const [st, setSt] = useState(saveStatus.state);
+  useEffect(() => saveStatus.subscribe(setSt), []);
+  if (st !== "error" && st !== "saving") return null;
+  const isErr = st === "error";
+  return (
+    <div style={{position:"fixed", left:"50%", bottom:18, transform:"translateX(-50%)",
+      zIndex:80, maxWidth:440, width:"calc(100% - 40px)",
+      background: isErr ? "var(--coral)" : "var(--ink)", color:"#fff",
+      fontSize:12.5, fontWeight:700, padding:"10px 16px", borderRadius:12,
+      textAlign:"center", boxShadow:"var(--shadow)", lineHeight:1.4}}>
+      {isErr
+        ? "⚠️ No se pudo guardar en la nube. Comprueba tu conexión o la configuración de Supabase."
+        : "Guardando…"}
+    </div>
+  );
+}
+
 function App() {
   const today = new Date();
   const [view, setView] = useState("menu");
@@ -1443,6 +1487,8 @@ function App() {
           <button className={view==="dash"?"active":""} onClick={()=>setView("dash")}>Progreso</button>
         </div>
       </header>
+
+      <SaveStatusBar />
 
       <main className="content">
         {view==="menu" ? (
