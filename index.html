@@ -75,6 +75,7 @@
   .tag-tupper { background:var(--blue-pale); color:var(--blue); }
   .tag-indiv { background:var(--plum-pale); color:var(--plum); }
   .tag-fish { background:#D7E8E6; color:#2B6E66; }
+  .tag-rated { background:#FCEFD2; color:#B07B16; }
   .card-actions { margin-top:auto; display:flex; gap:6px; padding-top:6px; border-top:1px solid var(--paper-2); }
   .mini-btn { flex:1; background:var(--white); border:1px solid var(--line); border-radius:9px; padding:6px 4px; font-size:11px; font-weight:700; color:var(--ink-soft); display:flex; align-items:center; justify-content:center; gap:3px; }
   .mini-btn.done { background:var(--sage); border-color:var(--sage); color:var(--white); }
@@ -113,6 +114,14 @@
 
   .sheet-section { padding:18px 22px 0; }
   .sheet-section h3 { font-size:13px; text-transform:uppercase; letter-spacing:0.07em; font-weight:800; color:var(--ink-soft); margin:0 0 10px; }
+  .rating-box { background:#FFF9EC; border:1px solid #F1E2BF; border-radius:14px; padding:13px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .rating-box .rb-text { font-size:13px; font-weight:700; color:#8A6314; line-height:1.35; }
+  .rating-box .rb-text small { display:block; font-size:11px; font-weight:600; color:var(--ink-soft); margin-top:2px; }
+  .stars { display:inline-flex; gap:3px; flex-shrink:0; }
+  .stars .star { background:none; border:none; padding:1px; font-size:25px; line-height:1; color:#E2D4B2; transition:color .12s, transform .08s; }
+  .stars .star.on { color:var(--gold); }
+  .stars .star:active { transform:scale(1.18); }
+  .stars.ro .star { font-size:13px; padding:0; pointer-events:none; }
   .note-box { border-radius:12px; padding:12px 14px; font-size:13px; line-height:1.5; }
   .note-box.ruben { background:var(--plum-pale); color:#5A3F58; }
   .note-box.tip { background:var(--sage-pale); color:var(--sage); }
@@ -329,7 +338,7 @@ const RECIPE_BANK = [
       S("Aceite de oliva",["Aceite de oliva"]),S("Pimentón",["Pimentón"]),S("Sal y pimienta",["Sal","Pimienta"])],
     steps:["Precalienta el horno a 200°C.","Corta los boniatos en cuñas con aceite, sal y pimentón. Hornéalos 15 min.","Sazona el pollo con sal, pimienta y zumo de medio limón.","Añade el pollo a la bandeja y hornea 15-18 min más.","Sirve con el resto del limón."] },
 
-  { id:"r2", name:"Lentejas estofadas con verduras", slot:"lunch", time:35, kcal:410, protein:24, fiberRich:true, tupper:true,
+  { id:"r2", name:"Lentejas estofadas con verduras", slot:"lunch", time:35, kcal:410, protein:24, fiberRich:true, tupper:true, warm:true,
     ingredients:[
       G("250g de lentejas","Lentejas",250,"g","P",X,2.4),
       G("1 zanahoria","Zanahoria",1,"ud","V",F),
@@ -338,7 +347,7 @@ const RECIPE_BANK = [
       S("Aceite, sal, pimentón y laurel",["Aceite de oliva","Sal","Pimentón","Laurel"])],
     steps:["Pica la cebolla, zanahoria y tomate.","Sofríe la cebolla y zanahoria 5 min.","Añade el tomate y el pimentón, 2 min.","Agrega las lentejas, el laurel y agua hasta cubrir.","Cocina 25-30 min. Sazona al final."] },
 
-  { id:"r3", name:"Garbanzos guisados con espinacas", slot:"lunch", time:25, kcal:430, protein:26, fiberRich:true, tupper:true,
+  { id:"r3", name:"Garbanzos guisados con espinacas", slot:"lunch", time:25, kcal:430, protein:26, fiberRich:true, tupper:true, warm:true,
     rubenNote:"Lleva tomate triturado. Para Rubén puedes guisar su parte con un poco más de caldo o agua en vez de tomate.",
     ingredients:[
       G("1 bote de garbanzos cocidos (400g)","Garbanzos cocidos",1,"bote","P",X),
@@ -348,7 +357,7 @@ const RECIPE_BANK = [
       S("Comino, aceite y sal",["Comino","Aceite de oliva","Sal"])],
     steps:["Sofríe el ajo picado en aceite.","Añade el tomate triturado y el comino, 3 min.","Incorpora los garbanzos escurridos, 5 min.","Añade las espinacas hasta que se reduzcan.","Sazona y sirve."] },
 
-  { id:"r4", name:"Estofado de judías blancas con verduras", slot:"lunch", time:25, kcal:400, protein:23, fiberRich:true, tupper:true,
+  { id:"r4", name:"Estofado de judías blancas con verduras", slot:"lunch", time:25, kcal:400, protein:23, fiberRich:true, tupper:true, warm:true,
     rubenNote:"Lleva tomate triturado. Para Rubén, sustitúyelo por más calabacín y un poco de caldo.",
     ingredients:[
       G("1 bote de judías blancas (400g)","Judías blancas cocidas",1,"bote","P",X),
@@ -485,7 +494,7 @@ const RECIPE_BANK = [
       S("Aceite, vinagre y sal",["Aceite de oliva","Vinagre","Sal"])],
     steps:["Escurre los garbanzos.","Corta tomate y cebolla pequeños.","Mezcla garbanzos, tomate, cebolla y atún.","Aliña."] },
 
-  { id:"r19", name:"Crema de calabaza con pollo desmenuzado", slot:"dinner", time:30, kcal:390, protein:30, fiberRich:false, tupper:true, isPuree:true,
+  { id:"r19", name:"Crema de calabaza con pollo desmenuzado", slot:"dinner", time:30, kcal:390, protein:30, fiberRich:false, tupper:true, isPuree:true, warm:true,
     ingredients:[
       G("500g de calabaza","Calabaza",500,"g","V",F),
       G("Pechuga de pollo cocida (200g)","Pechuga de pollo",200,"g","P",M),
@@ -494,7 +503,7 @@ const RECIPE_BANK = [
       S("Sal y pimienta",["Sal","Pimienta"])],
     steps:["Cuece calabaza y cebolla en el caldo 20 min.","Tritura hasta crema fina.","Sazona.","Añade el pollo desmenuzado al servir."] },
 
-  { id:"r20", name:"Puré de verduras con huevo cocido", slot:"dinner", time:30, kcal:340, protein:18, fiberRich:false, tupper:true, isPuree:true,
+  { id:"r20", name:"Puré de verduras con huevo cocido", slot:"dinner", time:30, kcal:340, protein:18, fiberRich:false, tupper:true, isPuree:true, warm:true,
     ingredients:[
       G("2 patatas","Patata",2,"ud","C",F),
       G("2 zanahorias","Zanahoria",2,"ud","V",F),
@@ -505,7 +514,7 @@ const RECIPE_BANK = [
       S("Aceite y sal",["Aceite de oliva","Sal"])],
     steps:["Trocea las verduras.","Cuécelas en el caldo 20 min.","Cuece los huevos 10 min aparte.","Tritura las verduras.","Sirve con el huevo en cuartos."] },
 
-  { id:"r21", name:"Crema de calabacín y puerro con pavo", slot:"dinner", time:25, kcal:330, protein:22, fiberRich:false, tupper:true, isPuree:true,
+  { id:"r21", name:"Crema de calabacín y puerro con pavo", slot:"dinner", time:25, kcal:330, protein:22, fiberRich:false, tupper:true, isPuree:true, warm:true,
     ingredients:[
       G("2 calabacines","Calabacín",2,"ud","V",F),
       G("1 puerro","Puerro",1,"ud","V",F),
@@ -515,7 +524,8 @@ const RECIPE_BANK = [
       S("Sal y pimienta",["Sal","Pimienta"])],
     steps:["Trocea calabacín, puerro y patata.","Cuécelos 18 min.","Tritura.","Sazona.","Sirve con el pavo en tiras."] },
 
-  { id:"r22", name:"Quiche vegetal", slot:"dinner", time:40, kcal:420, protein:24, fiberRich:false, tupper:true,
+  { id:"r22", name:"Quiche vegetal", slot:"dinner", time:40, kcal:420, protein:24, fiberRich:false, tupper:true, batch:2,
+    note:"La quiche rinde para dos comidas seguidas: se aprovecha también en la siguiente comida.",
     ingredients:[
       G("1 masa quebrada","Masa quebrada",1,"ud","C",X),
       G("3 huevos","Huevos",3,"ud","P",X),
@@ -576,7 +586,8 @@ const RECIPE_BANK = [
   // ===========================================================================
 
   // ----- COMIDAS de siempre -----
-  { id:"r28", name:"Quiche de bacon y espinacas", slot:"lunch", time:45, kcal:520, protein:30, fiberRich:false, tupper:true, favorite:true,
+  { id:"r28", name:"Quiche de bacon y espinacas", slot:"lunch", time:45, kcal:520, protein:30, fiberRich:false, tupper:true, favorite:true, batch:2,
+    note:"La quiche rinde para dos comidas seguidas: se aprovecha también en la siguiente comida.",
     ingredients:[
       G("1 masa de quiche","Masa de quiche",1,"ud","C",X),
       G("80g de queso rallado","Queso rallado",80,"g","P",X),
@@ -589,8 +600,10 @@ const RECIPE_BANK = [
     steps:["Precalienta el horno a 190°C y forra un molde con la masa.","Saltea el bacon y los champiñones; añade las espinacas hasta que reduzcan.","Bate los huevos con la nata de soja, sal y pimienta.","Reparte el salteado sobre la masa y vierte el batido.","Cubre con el queso rallado y hornea 30-35 min."] },
 
   { id:"r29", name:"Ensalada de verano (macarrones)", slot:"lunch", time:20, kcal:520, protein:26, fiberRich:false, tupper:true, favorite:true,
+    note:"Fa toma macarrones integrales y Rubén normales (se cuecen por separado).",
     ingredients:[
-      G("200g de macarrones","Macarrones",200,"g","C",X,2.2),
+      G("Macarrones integrales (para Fa)","Macarrones integrales",200,"g","C",X,2.2,"ruben"),
+      G("Macarrones normales (para Rubén)","Macarrones",200,"g","C",X,2.2,"me"),
       G("3 huevos cocidos","Huevos",3,"ud","P",X),
       G("1 lata de maíz","Maíz",1,"lata","O",X),
       G("1 zanahoria","Zanahoria",1,"ud","V",F),
@@ -654,7 +667,7 @@ const RECIPE_BANK = [
       S("Aceite o mostaza (opcional)",["Aceite de oliva"])],
     steps:["Tuesta el pan si quieres.","Monta con el pavo, el queso y la lechuga.","Cierra y, si te gusta, dale un golpe de plancha o sandwichera."] },
 
-  { id:"r36", name:"Puré con tortilla francesa", slot:"dinner", time:12, kcal:330, protein:24, fiberRich:false, tupper:false, isPuree:true, favorite:true,
+  { id:"r36", name:"Puré con tortilla francesa", slot:"dinner", time:12, kcal:330, protein:24, fiberRich:false, tupper:false, isPuree:true, favorite:true, warm:true,
     note:"El puré lo compramos hecho del Mercadona. Tortilla francesa: Rubén con huevos enteros; Fa con 1 huevo + claras (o solo claras) para menos calorías.",
     ingredients:[
       G("2 purés de verdura preparados","Puré de verduras (preparado)",2,"ud","V",X),
@@ -680,7 +693,7 @@ const RECIPE_BANK = [
   // ===========================================================================
 
   // ----- COMIDAS nuevas -----
-  { id:"r38", name:"Dahl de lentejas rojas con arroz basmati", slot:"lunch", time:30, kcal:480, protein:24, fiberRich:true, tupper:true,
+  { id:"r38", name:"Dahl de lentejas rojas con arroz basmati", slot:"lunch", time:30, kcal:480, protein:24, fiberRich:true, tupper:true, warm:true,
     rubenNote:"Lleva tomate triturado. Para Rubén, sustitúyelo por un poco más de caldo o leche de coco.",
     ingredients:[
       G("200g de lentejas rojas","Lentejas rojas",200,"g","P",X,2.4),
@@ -723,16 +736,6 @@ const RECIPE_BANK = [
       S("Aceite y pimienta",["Aceite de oliva","Pimienta"])],
     steps:["Tuesta el pan.","Unta el hummus.","Coloca el pavo, el tomate en rodajas y la rúcula.","Termina con un hilo de aceite y pimienta."] },
 
-  { id:"r42", name:"Salteado de tofu con verduras y soja", slot:"dinner", time:20, kcal:360, protein:26, fiberRich:true, tupper:true,
-    ingredients:[
-      G("300g de tofu firme","Tofu firme",300,"g","P",X),
-      G("1 pimiento","Pimiento",1,"ud","V",F),
-      G("1 calabacín","Calabacín",1,"ud","V",F),
-      G("1 zanahoria","Zanahoria",1,"ud","V",F),
-      S("Salsa de soja",["Salsa de soja"]),
-      S("Aceite y sésamo",["Aceite de oliva","Sésamo"])],
-    steps:["Escurre y corta el tofu en dados; dóralo bien por todas las caras.","Reserva el tofu y saltea las verduras en tiras 5-6 min.","Devuelve el tofu, añade la soja y saltea 1 min.","Sirve con sésamo."] },
-
   { id:"r43", name:"Revuelto de gambas, ajetes y espárragos", slot:"dinner", time:15, kcal:340, protein:28, fiberRich:false, tupper:false, fish:true,
     note:"Para Fa, usa 1 huevo + claras (o solo claras); Rubén con huevos enteros.",
     ingredients:[
@@ -741,7 +744,22 @@ const RECIPE_BANK = [
       G("1 manojo de espárragos verdes","Espárragos verdes",1,"ud","V",F),
       G("5 huevos","Huevos",5,"ud","P",X),
       S("Claras, aceite y sal",["Claras de huevo","Aceite de oliva","Sal"])],
-    steps:["Saltea los ajetes y los espárragos troceados 5 min.","Añade las gambas 2 min.","Incorpora los huevos batidos (claras para Fa) y remueve hasta cuajar."] }
+    steps:["Saltea los ajetes y los espárragos troceados 5 min.","Añade las gambas 2 min.","Incorpora los huevos batidos (claras para Fa) y remueve hasta cuajar."] },
+
+  // ===========================================================================
+  //  SOPA DE GALETS (temporada fría: de octubre a abril, 1-2 veces por semana)
+  // ===========================================================================
+  { id:"r44", name:"Sopa de galets con pilota", slot:"dinner", time:40, kcal:420, protein:28, fiberRich:false, tupper:true, warm:true, galets:true, favorite:true,
+    note:"Sopa de invierno: la tomamos 1 o 2 veces por semana de octubre a abril.",
+    ingredients:[
+      G("160g de galets","Galets",160,"g","C",X,2.5),
+      G("250g de carne picada mixta","Carne picada mixta",250,"g","P",M),
+      G("1 huevo","Huevos",1,"ud","P",X),
+      G("1 zanahoria","Zanahoria",1,"ud","V",F),
+      G("1 puerro","Puerro",1,"ud","V",F),
+      G("1,5L de caldo de pollo","Caldo de pollo",1500,"ml","O",X),
+      S("Pan rallado, ajo, perejil, sal y pimienta",["Pan rallado","Ajo","Perejil","Sal","Pimienta"])],
+    steps:["Prepara la pilota: mezcla la carne picada con el huevo, ajo y perejil picados, pan rallado, sal y pimienta; forma una bola grande o varias medianas.","Lleva el caldo a ebullición con la zanahoria y el puerro troceados.","Cuece la pilota en el caldo 20-25 min a fuego suave.","Añade los galets y cuece 12-15 min más.","Rectifica de sal y sirve bien caliente."] }
 ];
 
 const SLOTS = [ { key:"lunch", label:"Comida" }, { key:"dinner", label:"Cena" } ];
@@ -768,6 +786,12 @@ function mostRecentDow(from, dow){ const d=new Date(from); d.setHours(0,0,0,0); 
 // día de la semana elegido más cercano a 'anchor' (para la próxima semana, ~+7)
 function nearestDow(anchor, dow){ const d=new Date(anchor); d.setHours(0,0,0,0); for(let off=0; off<=3; off++){ if(addDays(d,off).getDay()===dow) return addDays(d,off); if(addDays(d,-off).getDay()===dow) return addDays(d,-off); } return d; }
 
+// ---- temporada del año ----
+// Temporada fría (sopa de galets): de octubre (mes 9) a abril (mes 3).
+function isColdSeason(date){ const m=date.getMonth(); return m>=9 || m<=3; }
+// Temporada cálida (verano, de mayo a septiembre): sin platos demasiado calientes (sopas, guisos de legumbre, cremas/purés).
+function isWarmSeason(date){ return !isColdSeason(date); }
+
 // ---- porciones por persona ----
 function personRaw(ing, person){ return Math.round(ing.q * SHARE[ing.r][person]); }
 function personsOf(entry){ return entry.diners==="me"?["me"]:entry.diners==="ruben"?["ruben"]:["me","ruben"]; }
@@ -782,15 +806,29 @@ function shopQty(ing, persons){
 // ---- generador ----
 function seededRng(seedStr){ let seed=0; for(let i=0;i<seedStr.length;i++) seed=(seed*31+seedStr.charCodeAt(i))>>>0; return ()=>{ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; }; }
 function shuffle(arr,rng){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+// Peso de un plato según su valoración (1-5 estrellas). Sin valorar = 2.5 (neutro).
+// Más estrellas -> más peso -> sale más a menudo; 1 estrella -> sale menos.
+function ratingWeight(r, ratings){ const v = ratings && ratings[r.id]; return (v && v>0) ? v : 2.5; }
+// Barajado ponderado (Efraimidis-Spirakis): a más peso, antes en la lista (y por tanto
+// más probabilidad de ser elegido). Mantiene el azar determinista del rng.
+function weightedShuffle(arr, rng, weightFn){
+  return arr.map(x=>({ x, k: Math.pow(rng(), 1/Math.max(0.01, weightFn(x))) }))
+    .sort((a,b)=> b.k - a.k).map(o=>o.x);
+}
 function defaultConfig(){ return Array.from({length:7},()=>({office:false,comida:"none",cena:"none"})); }
 function dinersFromOut(out){ return out==="yo"?"ruben":out==="ruben"?"me":"both"; }
 function recipeCells(plan){ return Object.keys(plan).filter(k=>plan[k]&&plan[k].type==="recipe"); }
 
-function generatePlan(seedStr, weekStart, config){
+function generatePlan(seedStr, weekStart, config, ratings){
   const rng = seededRng(seedStr);
-  const lunchAll = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"), rng);
-  const lunchTup = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"&&r.tupper), rng);
-  const dinnerAll = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"), rng);
+  const cold = isColdSeason(weekStart);
+  // En verano evitamos los platos demasiado calientes (sopas, guisos de legumbre, cremas/purés).
+  const bank = cold ? RECIPE_BANK : RECIPE_BANK.filter(r=>!r.warm);
+  // Barajado ponderado por valoración: los platos mejor valorados salen más a menudo.
+  const wf = r => ratingWeight(r, ratings);
+  const lunchAll = weightedShuffle(bank.filter(r=>r.slot==="lunch"), rng, wf);
+  const lunchTup = weightedShuffle(bank.filter(r=>r.slot==="lunch"&&r.tupper), rng, wf);
+  const dinnerAll = weightedShuffle(bank.filter(r=>r.slot==="dinner"), rng, wf);
   const usedL=new Set(), usedD=new Set();
   const Lref={v:0}, LTref={v:0}, Dref={v:0};
   function pull(arr, ref, used){
@@ -810,20 +848,61 @@ function generatePlan(seedStr, weekStart, config){
     else { const r = pull(dinnerAll,Dref,usedD);
       plan[d+"_dinner"]={type:"recipe", recipeId:r.id, diners:dinersFromOut(c.cena)}; }
   }
-  ensureFish(plan, rng);
-  ensurePuree(plan, rng);
-  ensureFavorites(plan, rng);
+  ensureFish(plan, rng, bank);
+  if(cold){ ensurePuree(plan, rng, bank); ensureGalets(plan, rng, bank); }
+  ensureFavorites(plan, rng, bank);
+  ensureBatch(plan);
   return plan;
+}
+
+// Platos que "rinden para dos comidas seguidas" (batch:2, p.ej. la quiche):
+// se aprovechan también en la comida siguiente. Se marca como sobras (leftover):
+// se muestra en el menú pero NO se vuelve a comprar. Solo extendemos uno por semana.
+function ensureBatch(plan){
+  // Se reutiliza la misma comida del día siguiente salvo que rompa otras garantías de la
+  // semana (pescado, puré/crema o sopa de galets) o sea ya otro plato "de dos comidas".
+  const safe = (k)=>{ const e=plan[k]; if(!e||e.type!=="recipe"||e.leftover) return false; const r=getRecipeById(e.recipeId); return r && !r.fish && !r.isPuree && !r.galets && !(r.batch>=2); };
+  for(let d=0; d<7; d++){
+    for(const slot of ["lunch","dinner"]){
+      const e=plan[d+"_"+slot];
+      if(!e||e.type!=="recipe"||e.leftover) continue;
+      const r=getRecipeById(e.recipeId);
+      if(!(r&&r.batch>=2)) continue;
+      // Preferimos la misma comida del día siguiente (dos tuppers seguidos); si no, la
+      // otra comida más cercana en el tiempo (misma cena del día, o comida del día siguiente).
+      const cands = slot==="lunch" ? [(d+1)+"_lunch", d+"_dinner"] : [(d+1)+"_dinner", (d+1)+"_lunch"];
+      for(const nk of cands){
+        if(parseInt(nk,10)>6) continue;
+        if(safe(nk)){ plan[nk]={...plan[nk], recipeId:e.recipeId, diners:e.diners, leftover:true}; return; }
+      }
+    }
+  }
+}
+
+// Temporada fría: garantiza 1 ó 2 sopas de galets a la semana (en cenas).
+function ensureGalets(plan, rng, bank){
+  const galetsRec = shuffle(bank.filter(r=>r.galets), rng);
+  if(!galetsRec.length) return;
+  const count = ()=> recipeCells(plan).filter(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&r.galets; }).length;
+  const target = 1 + (rng()<0.4?1:0); // 1 ó 2 veces por semana
+  let guard=0;
+  while(count()<target && guard++<8){
+    const dinners = recipeCells(plan).filter(k=>k.endsWith("dinner"));
+    const cand = dinners.find(k=>{ const r=getRecipeById(plan[k].recipeId); return r && !r.fish && !r.isPuree && !r.galets && !plan[k].leftover; });
+    if(!cand) break;
+    plan[cand] = {...plan[cand], recipeId: galetsRec[0].id, leftover:false};
+  }
 }
 
 // Garantiza que cada semana aparezcan algunos "platos de siempre" (favoritos),
 // dejando el resto para platos nuevos/variados. No toca el pescado ni el puré:
 // solo sustituye celdas que no son ni pescado ni puré.
-function ensureFavorites(plan, rng){
+function ensureFavorites(plan, rng, bank){
+  bank = bank || RECIPE_BANK;
   const TARGET = 4; // mínimo de platos de siempre por semana
-  const favLunch = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"&&r.favorite), rng);
+  const favLunch = shuffle(bank.filter(r=>r.slot==="lunch"&&r.favorite), rng);
   const favLunchTup = favLunch.filter(r=>r.tupper);
-  const favDinner = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&r.favorite), rng);
+  const favDinner = shuffle(bank.filter(r=>r.slot==="dinner"&&r.favorite), rng);
   const isFav = k => { const r=getRecipeById(plan[k].recipeId); return r&&r.favorite; };
   const isProtected = k => { const r=getRecipeById(plan[k].recipeId); return r&&(r.fish||r.isPuree); };
   const favCells = () => recipeCells(plan).filter(isFav);
@@ -844,16 +923,17 @@ function ensureFavorites(plan, rng){
   }
 }
 
-function ensureFish(plan, rng){
+function ensureFish(plan, rng, bank){
+  bank = bank || RECIPE_BANK;
   // Objetivo: 2 días de pescado a la semana (mínimo 1). Si hay más, se reduce; si hay menos, se añade.
   const TARGET = 2;
   const favFirst = (a,b)=> (b.favorite?1:0)-(a.favorite?1:0); // favoritos primero
-  const fishLunch = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"&&r.fish), rng).sort(favFirst);
+  const fishLunch = shuffle(bank.filter(r=>r.slot==="lunch"&&r.fish), rng).sort(favFirst);
   const fishLunchTup = fishLunch.filter(r=>r.tupper);
-  const fishDinner = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&r.fish), rng).sort(favFirst);
-  const noFishLunch = shuffle(RECIPE_BANK.filter(r=>r.slot==="lunch"&&!r.fish), rng);
+  const fishDinner = shuffle(bank.filter(r=>r.slot==="dinner"&&r.fish), rng).sort(favFirst);
+  const noFishLunch = shuffle(bank.filter(r=>r.slot==="lunch"&&!r.fish), rng);
   const noFishLunchTup = noFishLunch.filter(r=>r.tupper);
-  const noFishDinner = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&!r.fish), rng);
+  const noFishDinner = shuffle(bank.filter(r=>r.slot==="dinner"&&!r.fish), rng);
   const fishCells = () => recipeCells(plan).filter(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&r.fish; });
 
   // Añadir pescado si faltan
@@ -883,10 +963,11 @@ function ensureFish(plan, rng){
     if(cand){ plan[k]={...plan[k], recipeId:cand.id}; } else break;
   }
 }
-function ensurePuree(plan, rng){
+function ensurePuree(plan, rng, bank){
+  bank = bank || RECIPE_BANK;
   const dinners = recipeCells(plan).filter(k=>k.endsWith("dinner"));
   if(dinners.some(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&r.isPuree; })) return;
-  const purees = shuffle(RECIPE_BANK.filter(r=>r.slot==="dinner"&&r.isPuree), rng).sort((a,b)=>(b.favorite?1:0)-(a.favorite?1:0));
+  const purees = shuffle(bank.filter(r=>r.slot==="dinner"&&r.isPuree), rng).sort((a,b)=>(b.favorite?1:0)-(a.favorite?1:0));
   if(!purees.length) return;
   const target = dinners.find(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&!r.fish&&!r.favorite; })
     || dinners.find(k=>{ const r=getRecipeById(plan[k].recipeId); return r&&!r.fish; }) || dinners[0];
@@ -913,8 +994,9 @@ const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
 // compartidos, identificados solo por el nombre de cada "caja" (key).
 // Cualquiera que abra la app ve y edita lo mismo.
 
-// Estas son las tres "cajas" de datos que guarda la app.
-const DATA_KEYS = ["menu_weeks_v4", "menu_log_v4", "menu_expenses_v4"];
+// Estas son las "cajas" de datos que guarda la app.
+// menu_ratings_v4 = { [recipeId]: estrellas 1-5 } -> valoración de los platos nuevos.
+const DATA_KEYS = ["menu_weeks_v4", "menu_log_v4", "menu_expenses_v4", "menu_ratings_v4"];
 
 // Copia en memoria de los datos. La app lee de aquí (rápido) y cada cambio
 // se escribe en la nube en segundo plano.
@@ -982,14 +1064,14 @@ const store = {
     else { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
   }
 };
-function makeWeek(start, salt, config){
+function makeWeek(start, salt, config, ratings){
   const key = dateKey(start);
   const cfg = config || defaultConfig();
-  return { key, start:start.toISOString(), salt:salt||0, config:cfg, plan:generatePlan(key+":"+(salt||0), start, cfg), shopping:{checked:{},have:{},removed:{},extra:[],notes:""} };
+  return { key, start:start.toISOString(), salt:salt||0, config:cfg, plan:generatePlan(key+":"+(salt||0), start, cfg, ratings), shopping:{checked:{},have:{},removed:{},extra:[],notes:""} };
 }
 
 // ================= Componentes =================
-function MealCard({ entry, slotKey, slotLabel, dateISO, date, complied, onOpen, onToggleOffice, onCycleDiners, onToggleComplied }) {
+function MealCard({ entry, slotKey, slotLabel, dateISO, date, complied, rating, onOpen, onToggleOffice, onCycleDiners, onToggleComplied }) {
   if (!entry) {
     return (
       <div className="meal-card is-empty">
@@ -1023,6 +1105,8 @@ function MealCard({ entry, slotKey, slotLabel, dateISO, date, complied, onOpen, 
       <span className="meal-name" onClick={onOpen}>{name}</span>
       <div className="meal-meta">
         {r && <span>{r.kcal} kcal</span>}
+        {entry.leftover && <span className="tag tag-tupper">♻️ 2ª comida</span>}
+        {r && !r.favorite && rating>0 && <span className="tag tag-rated" title={rating+" de 5"}>{"★".repeat(rating)}</span>}
         {r && r.fiberRich && <span className="tag tag-fiber">Fibra</span>}
         {r && r.fish && <span className="tag tag-fish">Pescado</span>}
         {isOffice && <span className="tag tag-tupper">🍱 Tupper</span>}
@@ -1064,7 +1148,21 @@ function IngredientRow({ ing, persons }) {
   return <li><span className="ing-name">{ing.d}</span>{ing.dis==="ruben" && persons.includes("ruben") ? <span className="pp"><span className="ruben">Rubén no lo toma</span></span> : null}{ing.dis==="me" && persons.includes("me") ? <span className="pp"><span className="me">Fa no lo toma</span></span> : null}</li>;
 }
 
-function RecipeDetail({ recipe, displayName, ingredients, edited, diners, onEdit, onEditIngredients, onEatOut, onClear }) {
+function RatingStars({ value, onChange, readOnly }){
+  const [hover, setHover] = useState(0);
+  const v = readOnly ? (value||0) : (hover || value || 0);
+  return (
+    <div className={"stars"+(readOnly?" ro":"")} onMouseLeave={readOnly?undefined:()=>setHover(0)}>
+      {[1,2,3,4,5].map(n=>(
+        <button key={n} type="button" className={"star"+(n<=v?" on":"")} disabled={readOnly}
+          onMouseEnter={readOnly?undefined:()=>setHover(n)} onClick={readOnly?undefined:()=>onChange(n)}
+          aria-label={n+(n===1?" estrella":" estrellas")}>★</button>
+      ))}
+    </div>
+  );
+}
+
+function RecipeDetail({ recipe, displayName, ingredients, edited, diners, rating, onRate, onEdit, onEditIngredients, onEatOut, onClear }) {
   const persons = diners==="me"?["me"]:diners==="ruben"?["ruben"]:["me","ruben"];
   const ings = ingredients || recipe.ingredients;
   return (
@@ -1087,6 +1185,15 @@ function RecipeDetail({ recipe, displayName, ingredients, edited, diners, onEdit
         <div className="macro-pill"><span className="v">{recipe.protein}g</span><span className="l">proteína</span></div>
         <div className="macro-pill"><span className="v">{recipe.time}'</span><span className="l">tiempo</span></div>
       </div>
+      {!recipe.favorite && onRate && (
+        <div className="sheet-section">
+          <div className="rating-box">
+            <div className="rb-text">{rating>0 ? "Vuestra valoración" : "¿Qué os ha parecido?"}
+              <small>{rating>0 ? "Pulsa para cambiarla" : "Valóralo y saldrá más a menudo si os gusta"}</small></div>
+            <RatingStars value={rating} onChange={onRate} />
+          </div>
+        </div>
+      )}
       {recipe.rubenNote && (<div className="sheet-section"><div className="note-box ruben"><strong>Rubén (sin tomate):</strong> {recipe.rubenNote}</div></div>)}
       {recipe.note && (<div className="sheet-section"><div className="note-box" style={{background:"var(--blue-pale)",color:"#2A5A78"}}><strong>📌 Nota:</strong> {recipe.note}</div></div>)}
       <div className="sheet-section">
@@ -1218,7 +1325,7 @@ function EditForm({ initial, onSave, onCancel }) {
   );
 }
 
-function RecipePicker({ slotKey, onPick, onEatOut }) {
+function RecipePicker({ slotKey, onPick, onEatOut, onManual }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState(slotKey);
   const list = useMemo(()=>{
@@ -1229,6 +1336,12 @@ function RecipePicker({ slotKey, onPick, onEatOut }) {
   }, [query, filter]);
   return (
     <div className="sheet-section" style={{paddingBottom:4}}>
+      {onManual && (
+        <button className="recipe-pick-item" onClick={onManual} style={{width:"100%",borderStyle:"dashed",borderColor:"var(--sage-light)",marginBottom:12}}>
+          <div><div className="name">✏️ Añadir un plato manualmente</div><div className="meta">Escribe el nombre y las notas a mano</div></div>
+          <span className="chevron">›</span>
+        </button>
+      )}
       <input className="search-input" type="text" placeholder="Buscar receta…" value={query} onChange={e=>setQuery(e.target.value)} />
       <div className="pick-filter">
         <button className={filter==="lunch"?"active":""} onClick={()=>setFilter("lunch")}>Comidas</button>
@@ -1252,7 +1365,7 @@ function RecipePicker({ slotKey, onPick, onEatOut }) {
   );
 }
 
-function MealSheet({ context, onClose, onUpdate, onPatch }) {
+function MealSheet({ context, ratings, onRate, onClose, onUpdate, onPatch }) {
   const entry = context.entry;
   const [mode, setMode] = useState(entry ? "view" : "pick");
   const diners = (entry && entry.diners) || "both";
@@ -1262,7 +1375,8 @@ function MealSheet({ context, onClose, onUpdate, onPatch }) {
   if (mode==="pick") {
     body = <RecipePicker slotKey={context.slotKey}
       onPick={id=>save({type:"recipe",recipeId:id,diners,office:entry&&entry.office})}
-      onEatOut={()=>save({type:"eatout"})} />;
+      onEatOut={()=>save({type:"eatout"})}
+      onManual={()=>setMode("edit")} />;
   } else if (mode==="edit") {
     body = <EditForm initial={entry&&entry.type==="custom"?entry:{}} onSave={ne=>save({...ne,diners,office:entry&&entry.office})} onCancel={()=>setMode(entry?"view":"pick")} />;
   } else if (mode==="editIng" && entry && entry.type==="recipe") {
@@ -1283,15 +1397,16 @@ function MealSheet({ context, onClose, onUpdate, onPatch }) {
           <button className={diners==="ruben"?"active":""} onClick={()=>onPatch({diners:"ruben"})}>🧔 Solo Rubén</button>
         </div>
         <RecipeDetail recipe={r} displayName={entry.customName} ingredients={ings} edited={!!(entry.ingredients&&entry.ingredients.length)} diners={diners}
-          onEdit={()=>setMode("edit")} onEditIngredients={()=>setMode("editIng")} onEatOut={()=>save({type:"eatout"})} onClear={clear} />
+          rating={ratings ? (ratings[entry.recipeId]||0) : 0} onRate={onRate ? (stars)=>onRate(entry.recipeId, stars) : null}
+          onEdit={()=>setMode("pick")} onEditIngredients={()=>setMode("editIng")} onEatOut={()=>save({type:"eatout"})} onClear={clear} />
       </React.Fragment>
-    ) : <RecipePicker slotKey={context.slotKey} onPick={id=>save({type:"recipe",recipeId:id})} onEatOut={()=>save({type:"eatout"})} />;
+    ) : <RecipePicker slotKey={context.slotKey} onPick={id=>save({type:"recipe",recipeId:id})} onEatOut={()=>save({type:"eatout"})} onManual={()=>setMode("edit")} />;
   } else if (entry && entry.type==="custom") {
     body = <CustomDetail entry={entry} onEdit={()=>setMode("edit")} onEatOut={()=>save({type:"eatout"})} onClear={clear} />;
   } else if (entry && entry.type==="eatout") {
     body = <EatOutDetail onPickRecipe={()=>setMode("pick")} onEdit={()=>setMode("edit")} onClear={clear} />;
   } else {
-    body = <RecipePicker slotKey={context.slotKey} onPick={id=>save({type:"recipe",recipeId:id})} onEatOut={()=>save({type:"eatout"})} />;
+    body = <RecipePicker slotKey={context.slotKey} onPick={id=>save({type:"recipe",recipeId:id})} onEatOut={()=>save({type:"eatout"})} onManual={()=>setMode("edit")} />;
   }
   return (
     <div className="overlay">
@@ -1311,6 +1426,7 @@ function buildShopping(plan){
   const agg={}, customs=[];
   Object.values(plan).forEach(entry=>{
     if(!entry) return;
+    if(entry.leftover) return; // sobras de un plato que rinde 2 comidas: no se vuelve a comprar
     if(entry.type==="recipe"){
       const r=getRecipeById(entry.recipeId); if(!r) return;
       const persons = personsOf(entry);
@@ -1683,6 +1799,7 @@ function App() {
   const [weeks, setWeeks] = useState(()=>{ const s=store.get("menu_weeks_v4",null); return (s&&s.length)?s:[makeWeek(startOfWeek(today),0)]; });
   const [log, setLog] = useState(()=>store.get("menu_log_v4",{}));
   const [expenses, setExpenses] = useState(()=>store.get("menu_expenses_v4",[]));
+  const [ratings, setRatings] = useState(()=>store.get("menu_ratings_v4",{}));
   const [activeWeekIdx, setActiveWeekIdx] = useState(0);
   const [activeMeal, setActiveMeal] = useState(null);
   const [showCart, setShowCart] = useState(false);
@@ -1691,6 +1808,12 @@ function App() {
   useEffect(()=>{ store.set("menu_weeks_v4", weeks); }, [weeks]);
   useEffect(()=>{ store.set("menu_log_v4", log); }, [log]);
   useEffect(()=>{ store.set("menu_expenses_v4", expenses); }, [expenses]);
+  useEffect(()=>{ store.set("menu_ratings_v4", ratings); }, [ratings]);
+
+  // Valorar un plato (1-5 estrellas). Volver a pulsar la misma estrella quita la valoración.
+  function rateRecipe(recipeId, stars){
+    setRatings(rs=>{ const n={...rs}; if(!stars || n[recipeId]===stars) delete n[recipeId]; else n[recipeId]=stars; return n; });
+  }
 
   function updateEntry(weekKey, cell, ne){
     setWeeks(ws=>ws.map(w=>{ if(w.key!==weekKey) return w; const plan={...w.plan}; if(ne===null) delete plan[cell]; else plan[cell]=ne; return {...w,plan}; }));
@@ -1708,19 +1831,19 @@ function App() {
     const k=dateISO+"_"+slot; setLog(l=>{ const n={...l}; if(n[k]) delete n[k]; else n[k]=true; return n; });
   }
   function regenWeek(weekKey){
-    setWeeks(ws=>ws.map(w=>{ if(w.key!==weekKey) return w; const salt=(w.salt||0)+1; return {...w,salt,plan:generatePlan(w.key+":"+salt,new Date(w.start),w.config),shopping:{checked:{},have:{},extra:[]}}; }));
+    setWeeks(ws=>ws.map(w=>{ if(w.key!==weekKey) return w; const salt=(w.salt||0)+1; return {...w,salt,plan:generatePlan(w.key+":"+salt,new Date(w.start),w.config,ratings),shopping:{checked:{},have:{},extra:[]}}; }));
   }
   function addExpense(e){ setExpenses(xs=>xs.concat([e])); }
   function deleteExpense(id){ setExpenses(xs=>xs.filter(e=>e.id!==id)); }
   function confirmSetup(startDate, cfg){
     if(!showSetup) return;
     if(showSetup.mode==="create"){
-      setWeeks(ws=>{ if(ws.length>=2) return ws; return ws.concat([makeWeek(startDate,0,cfg)]); });
+      setWeeks(ws=>{ if(ws.length>=2) return ws; return ws.concat([makeWeek(startDate,0,cfg,ratings)]); });
       setActiveWeekIdx(1);
     } else {
       const wk = weeks.find(x=>x.key===showSetup.weekKey);
       const salt = wk ? (wk.salt||0)+1 : 0;
-      setWeeks(ws=>ws.map(x=> x.key===showSetup.weekKey ? makeWeek(startDate, salt, cfg) : x));
+      setWeeks(ws=>ws.map(x=> x.key===showSetup.weekKey ? makeWeek(startDate, salt, cfg, ratings) : x));
     }
     setShowSetup(null);
   }
@@ -1778,6 +1901,7 @@ function App() {
                         entry={w.plan[dayIdx+"_"+slot.key]||null}
                         slotKey={slot.key} slotLabel={slot.label} dateISO={dISO} date={dDate}
                         complied={!!log[dISO+"_"+slot.key]}
+                        rating={(()=>{ const e=w.plan[dayIdx+"_"+slot.key]; return e&&e.type==="recipe"?ratings[e.recipeId]:0; })()}
                         onOpen={()=>openMeal(w,dayIdx,slot)}
                         onToggleOffice={()=>toggleOffice(w.key,dayIdx+"_"+slot.key)}
                         onCycleDiners={()=>cycleDiners(w.key,dayIdx+"_"+slot.key)}
@@ -1799,6 +1923,7 @@ function App() {
       </main>
 
       {activeMeal && <MealSheet context={activeMeal}
+        ratings={ratings} onRate={rateRecipe}
         onClose={()=>setActiveMeal(null)}
         onUpdate={updateEntry}
         onPatch={(patch)=>{ patchEntry(activeMeal.weekKey, activeMeal.cell, patch); setActiveMeal(am=>am?{...am,entry:{...am.entry,...patch}}:am); }} />}
