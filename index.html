@@ -238,6 +238,10 @@
   .ed-sel.wide { flex:1; }
   .ed-del { width:34px; height:34px; border-radius:9px; border:1px solid var(--line); background:var(--white); color:var(--coral); font-size:15px; flex-shrink:0; }
   .ed-add { width:100%; padding:12px; border-radius:12px; border:1.5px dashed var(--sage-light); background:transparent; color:var(--sage); font-weight:700; font-size:14px; margin-top:4px; }
+  .ed-step { display:flex; gap:8px; align-items:flex-start; margin-bottom:8px; }
+  .ed-step-num { font-family:'Fraunces',serif; font-weight:600; font-size:13px; color:var(--sage); background:var(--sage-pale); width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:4px; }
+  .ed-step-text { flex:1; padding:9px 10px; border-radius:9px; border:1px solid var(--line); font-size:14px; font-family:inherit; resize:vertical; min-height:42px; line-height:1.4; }
+  .ed-del.step { margin-top:4px; }
 
   /* gastos */
   .exp-add { background:var(--white); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:var(--shadow); }
@@ -768,7 +772,21 @@ const MONTH_NAMES = ["enero","febrero","marzo","abril","mayo","junio","julio","a
 const DOW_MINI = ["L","M","X","J","V","S","D"];
 const UNIT_LABEL = { g:"g", ml:"ml", ud:"ud", lata:"lata(s)", bote:"bote(s)", diente:"dientes", rebanada:"rebanadas", loncha:"lonchas", bolsa:"bolsa(s)" };
 
-function getRecipeById(id){ return RECIPE_BANK.find(r => r.id === id); }
+// Cambios del usuario sobre las recetas base (nombre, ingredientes y pasos), persistidos
+// en la base de datos (clave menu_recipes_v4). Se fusionan sobre la receta original, así
+// que el cambio vale para TODAS las veces que salga el plato y para los menús futuros.
+let RECIPE_OVERRIDES = {};
+function getRecipeById(id){
+  const base = RECIPE_BANK.find(r => r.id === id);
+  if(!base) return undefined;
+  const o = RECIPE_OVERRIDES[base.id];
+  if(!o) return base;
+  const merged = { ...base, _edited:true };
+  if(o.name) merged.name = o.name;
+  if(o.ingredients && o.ingredients.length) merged.ingredients = o.ingredients;
+  if(o.steps && o.steps.length) merged.steps = o.steps;
+  return merged;
+}
 
 // ---- fechas ----
 function startOfWeek(date){ const d=new Date(date); const day=d.getDay(); const diff=day===0?-6:1-day; d.setDate(d.getDate()+diff); d.setHours(0,0,0,0); return d; }
@@ -996,7 +1014,8 @@ const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
 
 // Estas son las "cajas" de datos que guarda la app.
 // menu_ratings_v4 = { [recipeId]: estrellas 1-5 } -> valoración de los platos nuevos.
-const DATA_KEYS = ["menu_weeks_v4", "menu_log_v4", "menu_expenses_v4", "menu_ratings_v4"];
+// menu_recipes_v4 = { [recipeId]: { name?, ingredients?, steps? } } -> ediciones del plato base.
+const DATA_KEYS = ["menu_weeks_v4", "menu_log_v4", "menu_expenses_v4", "menu_ratings_v4", "menu_recipes_v4"];
 
 // Copia en memoria de los datos. La app lee de aquí (rápido) y cada cambio
 // se escribe en la nube en segundo plano.
@@ -1037,6 +1056,9 @@ async function loadAll(){
       try { const v = localStorage.getItem(k); if (v){ cache[k] = JSON.parse(v); pushToCloud(k); } } catch(e){}
     }
   });
+
+  // Dejamos listas las ediciones de las recetas base para que getRecipeById las aplique.
+  RECIPE_OVERRIDES = cache["menu_recipes_v4"] || {};
 }
 
 // Guardado en la nube con un pequeño retardo, para no saturar con cada tecla.
@@ -1165,6 +1187,7 @@ function RatingStars({ value, onChange, readOnly }){
 function RecipeDetail({ recipe, displayName, ingredients, edited, diners, rating, onRate, onEdit, onEditIngredients, onEatOut, onClear }) {
   const persons = diners==="me"?["me"]:diners==="ruben"?["ruben"]:["me","ruben"];
   const ings = ingredients || recipe.ingredients;
+  const isEdited = edited || !!recipe._edited;
   return (
     <React.Fragment>
       <div className="sheet-header">
@@ -1177,7 +1200,7 @@ function RecipeDetail({ recipe, displayName, ingredients, edited, diners, rating
             : <span className="badge" style={{background:"var(--sage-pale)",color:"var(--sage)"}}>✨ Nuevo</span>}
           {recipe.fiberRich && <span className="badge fiber">Rica en fibra</span>}
           {recipe.tupper && <span className="badge tupper">🍱 Apto tupper</span>}
-          {edited && <span className="badge" style={{background:"var(--gold)",color:"#fff"}}>✏️ Editada</span>}
+          {isEdited && <span className="badge" style={{background:"var(--gold)",color:"#fff"}}>✏️ Editada</span>}
         </div>
       </div>
       <div className="macro-row">
@@ -1207,7 +1230,6 @@ function RecipeDetail({ recipe, displayName, ingredients, edited, diners, rating
       <div className="sheet-section">
         <h3>Preparación</h3>
         <ul className="step-list">{recipe.steps.map((s,i)=>(<li key={i}><span className="step-num">{i+1}</span><span>{s}</span></li>))}</ul>
-        {edited && <div className="note-box tip" style={{marginTop:12}}>Has editado los ingredientes: ajusta los pasos a tus cambios.</div>}
       </div>
       <div className="action-row">
         <button className="action-btn" onClick={onEdit}>✏️ Cambiar plato</button>
@@ -1220,7 +1242,7 @@ function RecipeDetail({ recipe, displayName, ingredients, edited, diners, rating
   );
 }
 
-function IngredientEditor({ initial, initialName, onSave, onCancel }) {
+function IngredientEditor({ initial, initialName, initialSteps, onSave, onCancel }) {
   const TYPES=[["P","Proteína"],["C","Hidrato"],["V","Verdura"],["Ft","Grasa"],["O","Otro"],["staple","Condimento"]];
   const UNITS=["g","ml","ud","lata","bote","diente","rebanada","loncha","bolsa"];
   const STORES=[["fruteria","Frutería"],["mercado","Mercado"],["mercadona","Mercadona"]];
@@ -1230,9 +1252,13 @@ function IngredientEditor({ initial, initialName, onSave, onCancel }) {
     : { id:rid(), type:ing.r||"O", name:ing.n, qty:ing.q, unit:ing.u, store:ing.s||"mercadona", ck:ing.ck };
   const [name,setName]=useState(initialName||"");
   const [rows,setRows]=useState(()=> (initial||[]).map(toRow));
+  const [steps,setSteps]=useState(()=> (initialSteps||[]).map(s=>({id:rid(), text:s})));
   function patch(id, p){ setRows(rs=>rs.map(r=>r.id===id?{...r,...p}:r)); }
   function add(){ setRows(rs=>rs.concat([{id:rid(),type:"O",name:"",qty:"",unit:"g",store:"mercadona"}])); }
   function remove(id){ setRows(rs=>rs.filter(r=>r.id!==id)); }
+  function patchStep(id, text){ setSteps(ss=>ss.map(s=>s.id===id?{...s,text}:s)); }
+  function addStep(){ setSteps(ss=>ss.concat([{id:rid(),text:""}])); }
+  function removeStep(id){ setSteps(ss=>ss.filter(s=>s.id!==id)); }
   function build(){
     return rows.filter(r=>r.name.trim()).map(r=>{
       if(r.type==="staple") return { staple:true, d:r.name.trim(), items:[r.name.trim()] };
@@ -1242,15 +1268,17 @@ function IngredientEditor({ initial, initialName, onSave, onCancel }) {
       return { d, n:r.name.trim(), q, u:r.unit, r:r.type, s:r.store, ck:r.ck };
     });
   }
+  function buildSteps(){ return steps.map(s=>s.text.trim()).filter(Boolean); }
   return (
     <div className="sheet-section" style={{paddingBottom:8}}>
       <h3>Editar plato</h3>
+      <div className="note-box tip" style={{marginBottom:12}}>Los cambios se guardan en el plato y valen para todas las veces que salga y para los menús futuros.</div>
       <div className="field-group">
         <label>Nombre del plato</label>
         <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="Ej. Pollo con arroz" />
       </div>
       <h3>Ingredientes</h3>
-      <div className="note-box tip" style={{marginBottom:12}}>Quita o añade ingredientes. Los cambios se reflejan en esta receta y en la lista de la compra.</div>
+      <div className="note-box tip" style={{marginBottom:12}}>Quita o añade ingredientes. Los cambios se reflejan en la receta y en la lista de la compra.</div>
       {rows.map(r=>(
         <div className="ed-row" key={r.id}>
           <div className="ed-line">
@@ -1272,9 +1300,19 @@ function IngredientEditor({ initial, initialName, onSave, onCancel }) {
         </div>
       ))}
       <button className="ed-add" onClick={add}>＋ Añadir ingrediente</button>
-      <div className="action-row" style={{padding:0,marginTop:14}}>
+      <h3 style={{marginTop:20}}>Preparación</h3>
+      <div className="note-box tip" style={{marginBottom:12}}>Edita los pasos para que coincidan con tus cambios.</div>
+      {steps.map((s,i)=>(
+        <div className="ed-step" key={s.id}>
+          <span className="ed-step-num">{i+1}</span>
+          <textarea className="ed-step-text" rows={2} placeholder="Describe el paso" value={s.text} onChange={e=>patchStep(s.id,e.target.value)} />
+          <button className="ed-del step" onClick={()=>removeStep(s.id)} aria-label="Quitar paso">✕</button>
+        </div>
+      ))}
+      <button className="ed-add" onClick={addStep}>＋ Añadir paso</button>
+      <div className="action-row" style={{padding:0,marginTop:16}}>
         <button className="action-btn" onClick={onCancel}>Cancelar</button>
-        <button className="action-btn primary" onClick={()=>onSave({ name:name.trim(), ingredients:build() })}>Guardar</button>
+        <button className="action-btn primary" onClick={()=>onSave({ name:name.trim(), ingredients:build(), steps:buildSteps() })}>Guardar</button>
       </div>
     </div>
   );
@@ -1329,7 +1367,7 @@ function RecipePicker({ slotKey, onPick, onEatOut, onManual }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState(slotKey);
   const list = useMemo(()=>{
-    let rs = RECIPE_BANK;
+    let rs = RECIPE_BANK.map(r=>getRecipeById(r.id)); // con los cambios del usuario aplicados
     if(filter!=="all") rs = rs.filter(r=>r.slot===filter);
     if(query.trim()){ const q=query.toLowerCase(); rs=rs.filter(r=>r.name.toLowerCase().includes(q)); }
     return rs;
@@ -1365,7 +1403,7 @@ function RecipePicker({ slotKey, onPick, onEatOut, onManual }) {
   );
 }
 
-function MealSheet({ context, ratings, onRate, onClose, onUpdate, onPatch }) {
+function MealSheet({ context, ratings, onRate, onEditRecipe, onClose, onUpdate, onPatch }) {
   const entry = context.entry;
   const [mode, setMode] = useState(entry ? "view" : "pick");
   const diners = (entry && entry.diners) || "both";
@@ -1383,8 +1421,15 @@ function MealSheet({ context, ratings, onRate, onClose, onUpdate, onPatch }) {
     const r = getRecipeById(entry.recipeId);
     const current = (entry.ingredients && entry.ingredients.length) ? entry.ingredients : (r?r.ingredients:[]);
     const curName = entry.customName || (r?r.name:"");
-    body = <IngredientEditor initial={current} initialName={curName}
-      onSave={({name,ingredients})=>{ onPatch({ingredients, customName:(name && name!==(r?r.name:"")) ? name : null}); setMode("view"); }}
+    const curSteps = r ? r.steps : [];
+    body = <IngredientEditor initial={current} initialName={curName} initialSteps={curSteps}
+      onSave={({name,ingredients,steps})=>{
+        // Guarda el cambio en el PLATO BASE (nombre, ingredientes y pasos) en la base de datos.
+        onEditRecipe(entry.recipeId, { name:(name||r.name), ingredients, steps });
+        // Quita la edición "solo de hoy" para que la celda use ya la receta base actualizada.
+        onPatch({ ingredients:null, customName:null });
+        setMode("view");
+      }}
       onCancel={()=>setMode("view")} />;
   } else if (entry && entry.type==="recipe") {
     const r = getRecipeById(entry.recipeId);
@@ -1800,6 +1845,7 @@ function App() {
   const [log, setLog] = useState(()=>store.get("menu_log_v4",{}));
   const [expenses, setExpenses] = useState(()=>store.get("menu_expenses_v4",[]));
   const [ratings, setRatings] = useState(()=>store.get("menu_ratings_v4",{}));
+  const [recipeOverrides, setRecipeOverrides] = useState(()=>store.get("menu_recipes_v4",{}));
   const [activeWeekIdx, setActiveWeekIdx] = useState(0);
   const [activeMeal, setActiveMeal] = useState(null);
   const [showCart, setShowCart] = useState(false);
@@ -1813,6 +1859,20 @@ function App() {
   // Valorar un plato (1-5 estrellas). Volver a pulsar la misma estrella quita la valoración.
   function rateRecipe(recipeId, stars){
     setRatings(rs=>{ const n={...rs}; if(!stars || n[recipeId]===stars) delete n[recipeId]; else n[recipeId]=stars; return n; });
+  }
+
+  // Editar el PLATO BASE (nombre, ingredientes y pasos). El cambio se guarda en la nube y
+  // se aplica a todas las veces que salga el plato (y a los menús futuros), no solo a hoy.
+  function editBaseRecipe(recipeId, patch){
+    const cur = recipeOverrides[recipeId] || {};
+    const merged = { ...cur };
+    if(patch.name !== undefined) merged.name = patch.name;
+    if(patch.ingredients !== undefined) merged.ingredients = patch.ingredients;
+    if(patch.steps !== undefined) merged.steps = patch.steps;
+    const next = { ...recipeOverrides, [recipeId]: merged };
+    RECIPE_OVERRIDES = next;            // para que getRecipeById lo refleje ya
+    store.set("menu_recipes_v4", next); // guarda en la base de datos (cache + nube)
+    setRecipeOverrides(next);           // re-render
   }
 
   function updateEntry(weekKey, cell, ne){
@@ -1923,7 +1983,7 @@ function App() {
       </main>
 
       {activeMeal && <MealSheet context={activeMeal}
-        ratings={ratings} onRate={rateRecipe}
+        ratings={ratings} onRate={rateRecipe} onEditRecipe={editBaseRecipe}
         onClose={()=>setActiveMeal(null)}
         onUpdate={updateEntry}
         onPatch={(patch)=>{ patchEntry(activeMeal.weekKey, activeMeal.cell, patch); setActiveMeal(am=>am?{...am,entry:{...am.entry,...patch}}:am); }} />}
