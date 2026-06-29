@@ -267,6 +267,17 @@
   .dow-pick button { flex:1; min-width:38px; padding:9px 2px; border-radius:10px; border:1px solid var(--line); background:var(--white); font-size:12px; font-weight:700; color:var(--ink-soft); }
   .dow-pick button.active { background:var(--sage); border-color:var(--sage); color:#fff; }
   .start-info { padding:8px 22px 0; font-size:12.5px; color:var(--sage); font-weight:700; }
+  /* calendario */
+  .cal { padding:6px 22px 0; }
+  .cal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .cal-head .cal-title { font-family:'Fraunces',serif; font-size:16px; font-weight:600; text-transform:capitalize; }
+  .cal-nav { width:32px; height:32px; border-radius:50%; border:1px solid var(--line); background:var(--white); font-size:16px; color:var(--ink); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+  .cal-dow { text-align:center; font-size:10px; font-weight:800; text-transform:uppercase; color:var(--ink-soft); padding-bottom:2px; }
+  .cal-day { aspect-ratio:1; border:1px solid var(--line); border-radius:10px; background:var(--white); font-size:13.5px; font-weight:600; color:var(--ink); display:flex; align-items:center; justify-content:center; padding:0; }
+  .cal-day.empty { background:transparent; border:none; }
+  .cal-day.today { border-color:var(--sage-light); color:var(--sage); font-weight:800; }
+  .cal-day.selected { background:var(--sage); border-color:var(--sage); color:#fff; font-weight:800; }
   /* notas compra */
   .notes-area { width:100%; margin-top:8px; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:var(--white); font-size:14px; font-family:inherit; resize:vertical; min-height:70px; }
   .item-edit { flex:1; padding:8px 10px; border-radius:9px; border:1px solid var(--sage-light); font-size:14px; font-family:inherit; }
@@ -735,6 +746,8 @@ const RECIPE_BANK = [
 
 const SLOTS = [ { key:"lunch", label:"Comida" }, { key:"dinner", label:"Cena" } ];
 const DAY_NAMES = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+const MONTH_NAMES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const DOW_MINI = ["L","M","X","J","V","S","D"];
 const UNIT_LABEL = { g:"g", ml:"ml", ud:"ud", lata:"lata(s)", bote:"bote(s)", diente:"dientes", rebanada:"rebanadas", loncha:"lonchas", bolsa:"bolsa(s)" };
 
 function getRecipeById(id){ return RECIPE_BANK.find(r => r.id === id); }
@@ -998,7 +1011,7 @@ function MealCard({ entry, slotKey, slotLabel, dateISO, date, complied, onOpen, 
   const isOffice = !!entry.office;
   const diners = entry.diners || "both";
   const r = entry.type==="recipe" ? getRecipeById(entry.recipeId) : null;
-  const name = entry.type==="custom" ? (entry.name||"Comida personalizada") : (r ? r.name : "");
+  const name = entry.type==="custom" ? (entry.name||"Comida personalizada") : (entry.customName || (r ? r.name : ""));
   const canOffice = slotKey==="lunch" && officeAllowed(date);
   const dinersLabel = diners==="me" ? "Solo yo" : diners==="ruben" ? "Solo Rubén" : "";
   return (
@@ -1051,14 +1064,14 @@ function IngredientRow({ ing, persons }) {
   return <li><span className="ing-name">{ing.d}</span>{ing.dis==="ruben" && persons.includes("ruben") ? <span className="pp"><span className="ruben">Rubén no lo toma</span></span> : null}{ing.dis==="me" && persons.includes("me") ? <span className="pp"><span className="me">Fa no lo toma</span></span> : null}</li>;
 }
 
-function RecipeDetail({ recipe, ingredients, edited, diners, onEdit, onEditIngredients, onEatOut, onClear }) {
+function RecipeDetail({ recipe, displayName, ingredients, edited, diners, onEdit, onEditIngredients, onEatOut, onClear }) {
   const persons = diners==="me"?["me"]:diners==="ruben"?["ruben"]:["me","ruben"];
   const ings = ingredients || recipe.ingredients;
   return (
     <React.Fragment>
       <div className="sheet-header">
         <span className="slot-label">Receta</span>
-        <h2>{recipe.name}</h2>
+        <h2>{displayName || recipe.name}</h2>
         <div className="badge-row">
           <span className="badge meal">{recipe.slot==="lunch"?"🍽️ Comida":"🌙 Cena"}</span>
           {recipe.favorite
@@ -1079,7 +1092,7 @@ function RecipeDetail({ recipe, ingredients, edited, diners, onEdit, onEditIngre
       <div className="sheet-section">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
           <h3 style={{margin:0}}>Ingredientes {diners==="both"?"(por persona)":(diners==="me"?"(solo tú)":"(solo Rubén)")}</h3>
-          <button className="regen-btn" onClick={onEditIngredients}>✏️ Editar</button>
+          <button className="regen-btn" onClick={onEditIngredients}>✏️ Editar plato</button>
         </div>
         <ul className="ing-list">{ings.map((ing,i)=><IngredientRow key={i} ing={ing} persons={persons} />)}</ul>
         <div className="note-box tip" style={{marginTop:10}}>Pesa en crudo lo que vas a cocinar y en cocido lo que sirves. Las cantidades con "cocido" están estimadas.</div>
@@ -1100,7 +1113,7 @@ function RecipeDetail({ recipe, ingredients, edited, diners, onEdit, onEditIngre
   );
 }
 
-function IngredientEditor({ initial, onSave, onCancel }) {
+function IngredientEditor({ initial, initialName, onSave, onCancel }) {
   const TYPES=[["P","Proteína"],["C","Hidrato"],["V","Verdura"],["Ft","Grasa"],["O","Otro"],["staple","Condimento"]];
   const UNITS=["g","ml","ud","lata","bote","diente","rebanada","loncha","bolsa"];
   const STORES=[["fruteria","Frutería"],["mercado","Mercado"],["mercadona","Mercadona"]];
@@ -1108,6 +1121,7 @@ function IngredientEditor({ initial, onSave, onCancel }) {
   const toRow=(ing)=> ing.staple
     ? { id:rid(), type:"staple", name:ing.d, qty:"", unit:"ud", store:"mercadona" }
     : { id:rid(), type:ing.r||"O", name:ing.n, qty:ing.q, unit:ing.u, store:ing.s||"mercadona", ck:ing.ck };
+  const [name,setName]=useState(initialName||"");
   const [rows,setRows]=useState(()=> (initial||[]).map(toRow));
   function patch(id, p){ setRows(rs=>rs.map(r=>r.id===id?{...r,...p}:r)); }
   function add(){ setRows(rs=>rs.concat([{id:rid(),type:"O",name:"",qty:"",unit:"g",store:"mercadona"}])); }
@@ -1123,7 +1137,12 @@ function IngredientEditor({ initial, onSave, onCancel }) {
   }
   return (
     <div className="sheet-section" style={{paddingBottom:8}}>
-      <h3>Editar ingredientes</h3>
+      <h3>Editar plato</h3>
+      <div className="field-group">
+        <label>Nombre del plato</label>
+        <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="Ej. Pollo con arroz" />
+      </div>
+      <h3>Ingredientes</h3>
       <div className="note-box tip" style={{marginBottom:12}}>Quita o añade ingredientes. Los cambios se reflejan en esta receta y en la lista de la compra.</div>
       {rows.map(r=>(
         <div className="ed-row" key={r.id}>
@@ -1148,7 +1167,7 @@ function IngredientEditor({ initial, onSave, onCancel }) {
       <button className="ed-add" onClick={add}>＋ Añadir ingrediente</button>
       <div className="action-row" style={{padding:0,marginTop:14}}>
         <button className="action-btn" onClick={onCancel}>Cancelar</button>
-        <button className="action-btn primary" onClick={()=>onSave(build())}>Guardar</button>
+        <button className="action-btn primary" onClick={()=>onSave({ name:name.trim(), ingredients:build() })}>Guardar</button>
       </div>
     </div>
   );
@@ -1249,7 +1268,10 @@ function MealSheet({ context, onClose, onUpdate, onPatch }) {
   } else if (mode==="editIng" && entry && entry.type==="recipe") {
     const r = getRecipeById(entry.recipeId);
     const current = (entry.ingredients && entry.ingredients.length) ? entry.ingredients : (r?r.ingredients:[]);
-    body = <IngredientEditor initial={current} onSave={(ings)=>{ onPatch({ingredients:ings}); setMode("view"); }} onCancel={()=>setMode("view")} />;
+    const curName = entry.customName || (r?r.name:"");
+    body = <IngredientEditor initial={current} initialName={curName}
+      onSave={({name,ingredients})=>{ onPatch({ingredients, customName:(name && name!==(r?r.name:"")) ? name : null}); setMode("view"); }}
+      onCancel={()=>setMode("view")} />;
   } else if (entry && entry.type==="recipe") {
     const r = getRecipeById(entry.recipeId);
     const ings = (entry.ingredients && entry.ingredients.length) ? entry.ingredients : (r?r.ingredients:null);
@@ -1260,7 +1282,7 @@ function MealSheet({ context, onClose, onUpdate, onPatch }) {
           <button className={diners==="me"?"active":""} onClick={()=>onPatch({diners:"me"})}>🙋 Solo yo</button>
           <button className={diners==="ruben"?"active":""} onClick={()=>onPatch({diners:"ruben"})}>🧔 Solo Rubén</button>
         </div>
-        <RecipeDetail recipe={r} ingredients={ings} edited={!!(entry.ingredients&&entry.ingredients.length)} diners={diners}
+        <RecipeDetail recipe={r} displayName={entry.customName} ingredients={ings} edited={!!(entry.ingredients&&entry.ingredients.length)} diners={diners}
           onEdit={()=>setMode("edit")} onEditIngredients={()=>setMode("editIng")} onEatOut={()=>save({type:"eatout"})} onClear={clear} />
       </React.Fragment>
     ) : <RecipePicker slotKey={context.slotKey} onPick={id=>save({type:"recipe",recipeId:id})} onEatOut={()=>save({type:"eatout"})} />;
@@ -1401,12 +1423,43 @@ function ShoppingSheet({ weeks, initialWeekKey, onClose, onUpdateShopping }) {
   );
 }
 
-function WeekSetupPopup({ title, eyebrow, confirmLabel, computeStart, initialDow, initialConfig, onConfirm, onCancel }) {
-  const [dow, setDow] = useState(initialDow);
+function Calendar({ selected, onSelect }) {
+  const today = startOfToday();
+  const [view, setView] = useState(()=>({ y:selected.getFullYear(), m:selected.getMonth() }));
+  const first = new Date(view.y, view.m, 1);
+  const startOffset = (first.getDay()+6)%7; // lunes = 0
+  const daysInMonth = new Date(view.y, view.m+1, 0).getDate();
+  const cells = [];
+  for(let i=0;i<startOffset;i++) cells.push(null);
+  for(let d=1; d<=daysInMonth; d++) cells.push(d);
+  const prevMonth = ()=> setView(v => v.m===0 ? {y:v.y-1,m:11} : {y:v.y,m:v.m-1});
+  const nextMonth = ()=> setView(v => v.m===11 ? {y:v.y+1,m:0} : {y:v.y,m:v.m+1});
+  return (
+    <div className="cal">
+      <div className="cal-head">
+        <button className="cal-nav" onClick={prevMonth} aria-label="Mes anterior">‹</button>
+        <span className="cal-title">{MONTH_NAMES[view.m]} {view.y}</span>
+        <button className="cal-nav" onClick={nextMonth} aria-label="Mes siguiente">›</button>
+      </div>
+      <div className="cal-grid">
+        {DOW_MINI.map((d,i)=><div className="cal-dow" key={"h"+i}>{d}</div>)}
+        {cells.map((d,i)=>{
+          if(d===null) return <div className="cal-day empty" key={"e"+i}></div>;
+          const date = new Date(view.y, view.m, d);
+          const isSel = isSameDay(date, selected);
+          const isToday = isSameDay(date, today);
+          return <button key={"d"+i} className={"cal-day"+(isSel?" selected":"")+(isToday&&!isSel?" today":"")}
+            onClick={()=>onSelect(date)}>{d}</button>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+function WeekSetupPopup({ title, eyebrow, confirmLabel, initialStart, initialConfig, onConfirm, onCancel }) {
+  const [weekStart, setWeekStart] = useState(()=>{ const d=new Date(initialStart); d.setHours(0,0,0,0); return d; });
   const [cfg, setCfg] = useState(initialConfig || defaultConfig());
   const opts = [["none","Nadie"],["yo","Yo"],["ruben","Rubén"],["ambos","Ambos"]];
-  const DOWS = [["Lun",1],["Mar",2],["Mié",3],["Jue",4],["Vie",5],["Sáb",6],["Dom",0]];
-  const weekStart = computeStart(dow);
   function setDay(d, patch){ setCfg(c=>c.map((x,i)=> i===d ? {...x,...patch} : x)); }
   return (
     <div className="overlay">
@@ -1415,11 +1468,9 @@ function WeekSetupPopup({ title, eyebrow, confirmLabel, computeStart, initialDow
         <div className="sheet-handle"></div>
         <button className="close-btn" onClick={onCancel} aria-label="Cerrar">✕</button>
         <div className="sheet-header"><span className="slot-label">{eyebrow}</span><h2>{title}</h2>
-          <p style={{fontSize:13,color:"var(--ink-soft)",margin:"8px 0 0",lineHeight:1.5}}>Elige el día en que empieza la semana (el día que vas a la compra) y marca los días de oficina o de comer/cenar fuera.</p>
+          <p style={{fontSize:13,color:"var(--ink-soft)",margin:"8px 0 0",lineHeight:1.5}}>Elige en el calendario el día en que empieza la semana (el día que vas a la compra) y marca los días de oficina o de comer/cenar fuera.</p>
         </div>
-        <div className="dow-pick">
-          {DOWS.map(([l,v])=>(<button key={v} className={dow===v?"active":""} onClick={()=>setDow(v)}>{l}</button>))}
-        </div>
+        <Calendar selected={weekStart} onSelect={setWeekStart} />
         <p className="start-info">Empieza el {dayLabel(weekStart)} {fmtDate(weekStart)}</p>
         {Array.from({length:7}).map((_,d)=>{
           const date = addDays(weekStart, d);
@@ -1756,14 +1807,13 @@ function App() {
         const isCreate = showSetup.mode==="create";
         const anchor = addDays(new Date(weeks[weeks.length-1].start),7);
         const setupWeek = isCreate ? null : weeks.find(x=>x.key===showSetup.weekKey);
-        const computeStart = isCreate ? (dow)=>nearestDow(anchor, dow) : (dow)=>mostRecentDow(today, dow);
-        const initialDow = isCreate ? anchor.getDay() : (setupWeek ? new Date(setupWeek.start).getDay() : today.getDay());
+        const initialStart = isCreate ? anchor : (setupWeek ? new Date(setupWeek.start) : today);
         const initialConfig = (!isCreate && setupWeek) ? setupWeek.config : defaultConfig();
         return <WeekSetupPopup
           eyebrow={isCreate?"Próxima semana":"Regenerar semana"}
           title={isCreate?"Crear menú":"Regenerar menú"}
           confirmLabel={isCreate?"Generar menú":"Regenerar"}
-          computeStart={computeStart} initialDow={initialDow} initialConfig={initialConfig}
+          initialStart={initialStart} initialConfig={initialConfig}
           onConfirm={confirmSetup} onCancel={()=>setShowSetup(null)} />;
       })()}
     </div>
