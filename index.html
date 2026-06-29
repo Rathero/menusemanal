@@ -191,6 +191,9 @@
   .shop-item .del { background:transparent; border:none; color:var(--ink-soft); font-size:16px; padding:0 4px; flex-shrink:0; }
   .shop-item.have { opacity:0.55; }
   .shop-item.have .txt { color:var(--ink-soft); text-decoration:none; }
+  .shop-item .qty-chip { background:var(--paper-2); border:1px solid var(--line); border-radius:8px; padding:4px 8px; font-size:12.5px; font-weight:700; color:var(--ink); flex-shrink:0; white-space:nowrap; }
+  .shop-item .qty-chip.adj { background:#FCEFD2; border-color:var(--gold); color:#8A6314; }
+  .shop-item .qty-input { width:74px; padding:6px 8px; border-radius:8px; border:1px solid var(--sage-light); font-size:14px; font-family:inherit; flex-shrink:0; }
   .add-row { display:flex; gap:8px; padding:16px 22px 0; }
   .add-row button { background:var(--sage); color:var(--white); border:none; border-radius:12px; padding:0 18px; font-weight:700; font-size:14px; }
   .custom-note { margin:14px 22px 0; background:var(--paper-2); border-radius:12px; padding:12px 14px; font-size:13px; line-height:1.5; color:var(--ink-soft); }
@@ -1677,13 +1680,27 @@ function ShoppingSheet({ weeks, initialWeekKey, onClose, onUpdateShopping }) {
   const [newItem, setNewItem] = useState("");
   const [editId, setEditId] = useState(null);
   const [editTxt, setEditTxt] = useState("");
+  const [editQtyKey, setEditQtyKey] = useState(null);
+  const [editQtyVal, setEditQtyVal] = useState("");
   const week = weeks.find(w=>w.key===activeKey) || weeks[0];
   const allBuilt = useMemo(()=>buildShopping(week.plan), [week]);
   const removed = week.shopping.removed||{};
   const items = allBuilt.items.filter(it=>!removed[it.key]);
   const customs = allBuilt.customs;
   const checked = week.shopping.checked||{}, have = week.shopping.have||{}, extra = week.shopping.extra||[];
+  const qtyOv = week.shopping.qty||{}; // cantidades ajustadas a mano por el usuario
   const notes = week.shopping.notes||"";
+  // Empezar a editar la cantidad de un producto de la lista (p.ej. tengo 1 en casa, compro 1).
+  function startEditQty(it){ const cur = (qtyOv[it.key]!=null)?qtyOv[it.key]:it.qty; setEditQtyKey(it.key); setEditQtyVal(String(cur)); }
+  function saveQty(it){
+    const num = parseFloat(String(editQtyVal).replace(",","."));
+    if(editQtyVal.trim()!=="" && !isNaN(num) && num>=0){
+      const nq = {...qtyOv};
+      if(num===it.qty) delete nq[it.key]; else nq[it.key]=num; // si coincide con lo calculado, vuelve a lo automático
+      onUpdateShopping(week.key, {...week.shopping, qty:nq});
+    }
+    setEditQtyKey(null);
+  }
   const grouped = useMemo(()=>{ const g={}; items.forEach(it=>{ (g[it.store]=g[it.store]||[]).push(it); }); Object.values(g).forEach(a=>a.sort((x,y)=>x.name.localeCompare(y.name))); return g; }, [items]);
   const neededAuto = items.filter(it=>!have[it.key]);
   const total = neededAuto.length + extra.length;
@@ -1710,7 +1727,7 @@ function ShoppingSheet({ weeks, initialWeekKey, onClose, onUpdateShopping }) {
         <React.Fragment>
         <div className="shop-progress"><div className="bar"><div className="fill" style={{width:pct+"%"}}></div></div><div className="label">{done} de {total} comprado</div></div>
         {done>0 && (<div style={{padding:"12px 22px 0"}}><button className="create-btn" style={{margin:0}} onClick={()=>upd({...week.shopping,cleared:true})}>✅ Compra hecha (vaciar lista)</button></div>)}
-        <div className="shop-legend">Toca el texto para marcar lo comprado. Pulsa 🏠 si ya lo tienes en casa (no contará).</div>
+        <div className="shop-legend">Toca el texto para marcar lo comprado. Pulsa la cantidad ✏️ para ajustarla (p. ej. si ya tienes algo en casa). Pulsa 🏠 si ya lo tienes entero (no contará).</div>
         {STORE_ORDER.filter(s=>grouped[s]).map(s=>{
           const info=STORE_INFO[s];
           return (
@@ -1719,13 +1736,18 @@ function ShoppingSheet({ weeks, initialWeekKey, onClose, onUpdateShopping }) {
               <p className="sub">{info.sub}</p>
               {grouped[s].map(it=>{
                 const isHave=!!have[it.key]; const isDone=!isHave&&!!checked[it.key];
+                const shownQty = (qtyOv[it.key]!=null)?qtyOv[it.key]:it.qty; const adj = qtyOv[it.key]!=null;
+                const toggleDone = ()=>!isHave&&upd({...week.shopping,checked:{...checked,[it.key]:!checked[it.key]}});
                 return (
                   <div key={it.key} className={"shop-item"+(isHave?" have":(isDone?" done":""))}>
-                    <span className="check" role="button" tabIndex={0} onClick={()=>!isHave&&upd({...week.shopping,checked:{...checked,[it.key]:!checked[it.key]}})}>{isDone?"✓":""}</span>
-                    <span className="txt" onClick={()=>!isHave&&upd({...week.shopping,checked:{...checked,[it.key]:!checked[it.key]}})}>
-                      {!it.staple && <span className="qty">{it.qty} {UNIT_LABEL[it.unit]||it.unit} · </span>}
-                      {it.staple ? it.name+" (al gusto)" : it.name}
-                    </span>
+                    <span className="check" role="button" tabIndex={0} onClick={toggleDone}>{isDone?"✓":""}</span>
+                    {!it.staple && (editQtyKey===it.key
+                      ? <input className="qty-input" type="number" inputMode="decimal" autoFocus value={editQtyVal}
+                          onChange={e=>setEditQtyVal(e.target.value)}
+                          onKeyDown={e=>{ if(e.key==="Enter") saveQty(it); }} onBlur={()=>saveQty(it)} />
+                      : <button className={"qty-chip"+(adj?" adj":"")} title="Editar cantidad" onClick={()=>startEditQty(it)}>{shownQty} {UNIT_LABEL[it.unit]||it.unit} ✏️</button>
+                    )}
+                    <span className="txt" onClick={toggleDone}>{it.staple ? it.name+" (al gusto)" : it.name}</span>
                     <button className={"have-btn"+(isHave?" on":"")} title="Ya lo tengo en casa" onClick={()=>upd({...week.shopping,have:{...have,[it.key]:!have[it.key]}})}>🏠 {isHave?"En casa":"Tengo"}</button>
                     <button className="icon-btn" title="Quitar de la lista" onClick={()=>upd({...week.shopping,removed:{...removed,[it.key]:true}})}>✕</button>
                   </div>
