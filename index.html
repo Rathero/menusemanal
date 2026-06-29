@@ -763,7 +763,191 @@ const RECIPE_BANK = [
       G("1 puerro","Puerro",1,"ud","V",F),
       G("1,5L de caldo de pollo","Caldo de pollo",1500,"ml","O",X),
       S("Pan rallado, ajo, perejil, sal y pimienta",["Pan rallado","Ajo","Perejil","Sal","Pimienta"])],
-    steps:["Prepara la pilota: mezcla la carne picada con el huevo, ajo y perejil picados, pan rallado, sal y pimienta; forma una bola grande o varias medianas.","Lleva el caldo a ebullición con la zanahoria y el puerro troceados.","Cuece la pilota en el caldo 20-25 min a fuego suave.","Añade los galets y cuece 12-15 min más.","Rectifica de sal y sirve bien caliente."] }
+    steps:["Prepara la pilota: mezcla la carne picada con el huevo, ajo y perejil picados, pan rallado, sal y pimienta; forma una bola grande o varias medianas.","Lleva el caldo a ebullición con la zanahoria y el puerro troceados.","Cuece la pilota en el caldo 20-25 min a fuego suave.","Añade los galets y cuece 12-15 min más.","Rectifica de sal y sirve bien caliente."] },
+
+  // ===========================================================================
+  //  RECETAS VERANIEGAS (fáciles, frescas y saludables). Sin platos calientes,
+  //  así que salen sobre todo en verano para dar más variedad.
+  // ===========================================================================
+
+  // ----- COMIDAS veraniegas -----
+  { id:"r45", name:"Ensalada César de pollo a la plancha", slot:"lunch", time:20, kcal:470, protein:40, fiberRich:false, tupper:true,
+    ingredients:[
+      G("Pechuga de pollo (300g)","Pechuga de pollo",300,"g","P",M),
+      G("1 lechuga romana","Lechuga romana",1,"ud","V",F),
+      G("40g de queso parmesano","Queso parmesano",40,"g","P",X),
+      G("60g de pan integral (picatostes)","Pan integral",60,"g","C",X),
+      S("Salsa césar ligera (yogur, mostaza, limón y ajo)",["Yogur natural","Mostaza","Limón","Ajo"])],
+    steps:["Salpimenta el pollo y hazlo a la plancha 5-6 min por lado; córtalo en tiras.","Trocea la lechuga y ponla en un bol.","Tuesta el pan en dados para los picatostes.","Mezcla el yogur con mostaza, zumo de limón y ajo para la salsa.","Monta con el pollo, el parmesano y los picatostes; aliña."] },
+
+  { id:"r46", name:"Bowl mediterráneo de garbanzos, pepino y feta", slot:"lunch", time:15, kcal:450, protein:22, fiberRich:true, tupper:true,
+    ingredients:[
+      G("1 bote de garbanzos cocidos (400g)","Garbanzos cocidos",1,"bote","P",X),
+      G("1 pepino","Pepino",1,"ud","V",F),
+      G("100g de queso feta","Queso feta",100,"g","P",X),
+      G("60g de aceitunas","Aceitunas",60,"g","O",X),
+      G("1/2 cebolla morada","Cebolla morada",1,"ud","V",F),
+      S("Aceite, limón, orégano y sal",["Aceite de oliva","Limón","Orégano","Sal"])],
+    steps:["Escurre y enjuaga los garbanzos.","Corta el pepino y la cebolla en dados pequeños.","Mézclalos con los garbanzos, las aceitunas y el feta desmenuzado.","Aliña con aceite, limón, orégano y sal."] },
+
+  { id:"r47", name:"Ensalada de arroz integral con pollo y aguacate", slot:"lunch", time:25, kcal:520, protein:35, fiberRich:false, tupper:true,
+    ingredients:[
+      G("150g de arroz integral","Arroz integral",150,"g","C",X,2.8),
+      G("Pechuga de pollo (250g)","Pechuga de pollo",250,"g","P",M),
+      G("1 aguacate","Aguacate",1,"ud","Ft",F),
+      G("1 lata de maíz","Maíz",1,"lata","O",X),
+      G("1 pimiento rojo","Pimiento rojo",1,"ud","V",F),
+      S("Aceite, limón y sal",["Aceite de oliva","Limón","Sal"])],
+    steps:["Cuece el arroz integral y enfríalo.","Haz el pollo a la plancha y córtalo en dados.","Corta el aguacate y el pimiento.","Mezcla todo con el maíz.","Aliña y sirve frío."] },
+
+  { id:"r48", name:"Tabulé de cuscús con garbanzos y hierbabuena", slot:"lunch", time:20, kcal:460, protein:18, fiberRich:true, tupper:true,
+    ingredients:[
+      G("150g de cuscús integral","Cuscús integral",150,"g","C",X,2.5),
+      G("1 bote de garbanzos cocidos (400g)","Garbanzos cocidos",1,"bote","P",X),
+      G("1 pepino","Pepino",1,"ud","V",F),
+      G("1 tomate","Tomate",1,"ud","V",F,null,"ruben"),
+      G("1 limón","Limón",1,"ud","V",F),
+      S("Hierbabuena, perejil, aceite y sal",["Hierbabuena","Perejil","Aceite de oliva","Sal"])],
+    steps:["Hidrata el cuscús con agua caliente y un poco de aceite; deja templar y suéltalo con un tenedor.","Pica el pepino y el tomate muy pequeños.","Mezcla el cuscús con los garbanzos, el pepino y el tomate.","Añade hierbabuena y perejil picados.","Aliña con limón, aceite y sal; sirve frío."] },
+
+  { id:"r49", name:"Ensalada de patata, judías verdes y atún", slot:"lunch", time:25, kcal:430, protein:30, fiberRich:false, tupper:true, fish:true,
+    ingredients:[
+      G("3 patatas","Patata",3,"ud","C",F),
+      G("200g de judías verdes","Judías verdes",200,"g","V",F),
+      G("2 latas de atún al natural","Atún al natural",2,"lata","P",X),
+      G("2 huevos","Huevos",2,"ud","P",X),
+      G("60g de aceitunas","Aceitunas",60,"g","O",X),
+      S("Aceite, vinagre y sal",["Aceite de oliva","Vinagre","Sal"])],
+    steps:["Cuece las patatas y las judías verdes hasta que estén tiernas; deja templar.","Cuece los huevos 10 min.","Corta las patatas en rodajas y trocea las judías.","Mezcla con el atún escurrido, los huevos en cuartos y las aceitunas.","Aliña y sirve."] },
+
+  { id:"r50", name:"Pollo al limón y orégano con ensalada de zanahoria", slot:"lunch", time:20, kcal:440, protein:42, fiberRich:false, tupper:true,
+    ingredients:[
+      G("Pechuga de pollo (300g)","Pechuga de pollo",300,"g","P",M),
+      G("2 zanahorias","Zanahoria",2,"ud","V",F),
+      G("1 bolsa de mezcla de ensalada","Mezcla de ensalada",1,"bolsa","V",F),
+      G("1 limón","Limón",1,"ud","V",F),
+      S("Aceite, orégano, sal y pimienta",["Aceite de oliva","Orégano","Sal","Pimienta"])],
+    steps:["Marina el pollo con zumo de limón, orégano, sal y pimienta 10 min.","Hazlo a la plancha 5-6 min por lado.","Ralla o corta la zanahoria en tiras finas.","Sirve el pollo con la ensalada y la zanahoria aliñadas."] },
+
+  { id:"r51", name:"Salmón a la plancha con ensalada de aguacate y mango", slot:"lunch", time:20, kcal:540, protein:38, fiberRich:false, tupper:false, fish:true,
+    ingredients:[
+      G("Salmón (300g)","Salmón",300,"g","P",M),
+      G("1 aguacate","Aguacate",1,"ud","Ft",F),
+      G("1 mango","Mango",1,"ud","V",F),
+      G("1 bolsa de canónigos","Canónigos",1,"bolsa","V",F),
+      G("1 lima","Lima",1,"ud","V",F),
+      S("Aceite y sal",["Aceite de oliva","Sal"])],
+    steps:["Salpimenta el salmón y hazlo a la plancha 3-4 min por lado.","Corta el aguacate y el mango en dados.","Mézclalos con los canónigos.","Aliña con lima, aceite y sal.","Sirve el salmón sobre la ensalada."] },
+
+  { id:"r52", name:"Brochetas de pollo y verduras con cuscús", slot:"lunch", time:25, kcal:500, protein:38, fiberRich:false, tupper:true,
+    ingredients:[
+      G("Pechuga de pollo (300g)","Pechuga de pollo",300,"g","P",M),
+      G("1 pimiento","Pimiento",1,"ud","V",F),
+      G("1 calabacín","Calabacín",1,"ud","V",F),
+      G("1 cebolla","Cebolla",1,"ud","V",F),
+      G("150g de cuscús integral","Cuscús integral",150,"g","C",X,2.5),
+      S("Aceite, pimentón, sal y pimienta",["Aceite de oliva","Pimentón","Sal","Pimienta"])],
+    steps:["Corta el pollo y las verduras en dados y monta las brochetas.","Sazona con pimentón, sal, pimienta y aceite.","Hazlas a la plancha o al horno 12-15 min, girando.","Hidrata el cuscús con agua caliente y suéltalo con un tenedor.","Sirve las brochetas sobre el cuscús."] },
+
+  { id:"r53", name:"Ensalada de quinoa, pollo y pepino con menta", slot:"lunch", time:25, kcal:490, protein:34, fiberRich:true, tupper:true,
+    ingredients:[
+      G("150g de quinoa","Quinoa",150,"g","C",X,3.0),
+      G("Pechuga de pollo (250g)","Pechuga de pollo",250,"g","P",M),
+      G("1 pepino","Pepino",1,"ud","V",F),
+      G("80g de queso feta","Queso feta",80,"g","P",X),
+      S("Menta, aceite, limón y sal",["Menta","Aceite de oliva","Limón","Sal"])],
+    steps:["Cuece la quinoa y déjala enfriar.","Haz el pollo a la plancha y córtalo en dados.","Corta el pepino en daditos.","Mezcla con la quinoa, el feta y la menta picada.","Aliña con limón, aceite y sal."] },
+
+  { id:"r54", name:"Wrap integral de pollo, aguacate y verduras", slot:"lunch", time:15, kcal:520, protein:34, fiberRich:false, tupper:false,
+    ingredients:[
+      G("4 tortillas integrales","Tortillas integrales",4,"ud","C",X),
+      G("Pechuga de pollo (250g)","Pechuga de pollo",250,"g","P",M),
+      G("1 aguacate","Aguacate",1,"ud","Ft",F),
+      G("1 tomate","Tomate",1,"ud","V",F,null,"ruben"),
+      G("Lechuga","Lechuga",1,"ud","V",F),
+      S("Aceite, sal y pimienta",["Aceite de oliva","Sal","Pimienta"])],
+    steps:["Haz el pollo a la plancha y córtalo en tiras.","Calienta ligeramente las tortillas.","Aplasta el aguacate y úntalo sobre cada tortilla.","Reparte el pollo, el tomate y la lechuga.","Enrolla y sirve."] },
+
+  // ----- CENAS veraniegas -----
+  { id:"r55", name:"Tortilla de calabacín y cebolla", slot:"dinner", time:20, kcal:350, protein:22, fiberRich:false, tupper:true,
+    ingredients:[
+      G("6 huevos","Huevos",6,"ud","P",X),
+      G("2 calabacines","Calabacín",2,"ud","V",F),
+      G("1 cebolla","Cebolla",1,"ud","V",F),
+      S("Aceite de oliva y sal",["Aceite de oliva","Sal"])],
+    steps:["Pocha el calabacín y la cebolla en dados 8-10 min.","Bate los huevos con sal.","Mézclalos con la verdura escurrida.","Cuaja la tortilla 3-4 min por cada lado."] },
+
+  { id:"r56", name:"Ensalada de mozzarella, melocotón y rúcula", slot:"dinner", time:12, kcal:380, protein:22, fiberRich:false, tupper:false,
+    ingredients:[
+      G("250g de mozzarella fresca","Mozzarella fresca",250,"g","P",X),
+      G("2 melocotones","Melocotón",2,"ud","V",F),
+      G("1 bolsa de rúcula","Rúcula",1,"bolsa","V",F),
+      G("30g de nueces","Nueces",30,"g","Ft",X),
+      S("Aceite, vinagre balsámico y sal",["Aceite de oliva","Vinagre balsámico","Sal"])],
+    steps:["Pon la rúcula en una fuente.","Añade la mozzarella y el melocotón en gajos.","Reparte las nueces.","Aliña con aceite, balsámico y sal."] },
+
+  { id:"r57", name:"Langostinos a la plancha con ensalada verde", slot:"dinner", time:15, kcal:320, protein:30, fiberRich:false, tupper:false, fish:true,
+    ingredients:[
+      G("300g de langostinos","Langostinos",300,"g","P",M),
+      G("1 bolsa de ensalada variada","Ensalada variada",1,"bolsa","V",F),
+      G("1 aguacate","Aguacate",1,"ud","Ft",F),
+      G("1 limón","Limón",1,"ud","V",F),
+      S("Aceite, ajo, sal y perejil",["Aceite de oliva","Ajo","Sal","Perejil"])],
+    steps:["Saltea los langostinos con ajo y un poco de aceite 3-4 min.","Prepara la ensalada con el aguacate en dados.","Aliña con limón, aceite y sal.","Sirve los langostinos sobre la ensalada."] },
+
+  { id:"r58", name:"Tosta de salmón ahumado, aguacate y huevo", slot:"dinner", time:10, kcal:420, protein:26, fiberRich:false, tupper:false, fish:true,
+    ingredients:[
+      G("4 rebanadas de pan integral","Pan integral",4,"rebanada","C",X),
+      G("100g de salmón ahumado","Salmón ahumado",100,"g","P",X),
+      G("1 aguacate","Aguacate",1,"ud","Ft",F),
+      G("2 huevos","Huevos",2,"ud","P",X),
+      S("Limón, sal y pimienta",["Limón","Sal","Pimienta"])],
+    steps:["Tuesta el pan.","Aplasta el aguacate con limón, sal y pimienta y úntalo.","Reparte el salmón ahumado.","Añade el huevo (poché o a la plancha) por encima."] },
+
+  { id:"r59", name:"Hummus con crudités y huevo cocido", slot:"dinner", time:12, kcal:380, protein:20, fiberRich:true, tupper:false,
+    ingredients:[
+      G("200g de hummus","Hummus",200,"g","P",X),
+      G("2 zanahorias","Zanahoria",2,"ud","V",F),
+      G("1 pepino","Pepino",1,"ud","V",F),
+      G("1 pimiento","Pimiento",1,"ud","V",F),
+      G("2 huevos","Huevos",2,"ud","P",X),
+      S("Pan integral o picos (opcional)",["Pan integral"])],
+    steps:["Cuece los huevos 10 min.","Corta la zanahoria, el pepino y el pimiento en bastones.","Sirve el hummus con las crudités y el huevo en cuartos."] },
+
+  { id:"r60", name:"Ensalada de aguacate, huevo y atún", slot:"dinner", time:12, kcal:400, protein:28, fiberRich:false, tupper:false, fish:true,
+    ingredients:[
+      G("2 latas de atún al natural","Atún al natural",2,"lata","P",X),
+      G("1 aguacate","Aguacate",1,"ud","Ft",F),
+      G("2 huevos","Huevos",2,"ud","P",X),
+      G("1 bolsa de canónigos","Canónigos",1,"bolsa","V",F),
+      G("1/2 cebolla morada","Cebolla morada",1,"ud","V",F),
+      S("Aceite, vinagre y sal",["Aceite de oliva","Vinagre","Sal"])],
+    steps:["Cuece los huevos 10 min.","Pon los canónigos en un bol.","Añade el aguacate en dados, la cebolla y el atún.","Incorpora los huevos en cuartos.","Aliña."] },
+
+  { id:"r61", name:"Berenjena a la plancha con queso fresco y jamón", slot:"dinner", time:20, kcal:360, protein:24, fiberRich:false, tupper:false,
+    ingredients:[
+      G("2 berenjenas","Berenjena",2,"ud","V",F),
+      G("150g de queso fresco","Queso fresco",150,"g","P",X),
+      G("4 lonchas de jamón serrano","Jamón serrano",4,"loncha","P",X),
+      S("Aceite, orégano y sal",["Aceite de oliva","Orégano","Sal"])],
+    steps:["Corta la berenjena en láminas y hazla a la plancha con un poco de aceite 3-4 min por lado.","Sazona con sal y orégano.","Sirve con el queso fresco y el jamón serrano por encima."] },
+
+  { id:"r62", name:"Ensalada de pavo, espinacas y fresas", slot:"dinner", time:15, kcal:360, protein:30, fiberRich:false, tupper:false,
+    ingredients:[
+      G("250g de pechuga de pavo","Pechuga de pavo",250,"g","P",M),
+      G("1 bolsa de espinacas baby","Espinacas baby",1,"bolsa","V",F),
+      G("200g de fresas","Fresas",200,"g","V",F),
+      G("30g de nueces","Nueces",30,"g","Ft",X),
+      S("Aceite, vinagre y sal",["Aceite de oliva","Vinagre","Sal"])],
+    steps:["Haz el pavo a la plancha y córtalo en tiras.","Pon las espinacas en un bol.","Añade las fresas en láminas y las nueces.","Incorpora el pavo y aliña."] },
+
+  { id:"r63", name:"Sardinas a la plancha con ensalada", slot:"dinner", time:15, kcal:380, protein:30, fiberRich:false, tupper:false, fish:true,
+    ingredients:[
+      G("8 sardinas","Sardinas",8,"ud","P",M),
+      G("1 bolsa de ensalada variada","Ensalada variada",1,"bolsa","V",F),
+      G("2 rebanadas de pan integral","Pan integral",2,"rebanada","C",X),
+      S("Aceite, sal y limón",["Aceite de oliva","Sal","Limón"])],
+    steps:["Sazona las sardinas con sal.","Hazlas a la plancha 2-3 min por lado.","Prepara la ensalada y alíñala.","Sirve las sardinas con la ensalada y el pan."] }
 ];
 
 const SLOTS = [ { key:"lunch", label:"Comida" }, { key:"dinner", label:"Cena" } ];
